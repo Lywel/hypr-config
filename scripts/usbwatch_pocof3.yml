@@ -1,0 +1,9 @@
+---
+devices:
+  - ID_MODEL: POCO_F3
+    ID_MODEL_ENC: POCO\x20F3
+    ID_SERIAL: Xiaomi_POCO_F3_3a693118
+    ID_SERIAL_SHORT: 3a693118
+    ID_VENDOR: Xiaomi
+    ID_VENDOR_ENC: Xiaomi
+

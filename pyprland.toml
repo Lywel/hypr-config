@@ -1,0 +1,34 @@
+[pyprland]
+plugins = [
+  "scratchpads",
+  "magnify",
+  "toggle_special",
+	"shortcuts_menu",
+	"fetch_client_menu",
+]
+
+[scratchpads.beeper]
+animation = "fromTop"
+command = "beeper"
+class = "Beeper"
+size = "55% 80%"
+max_size = "1080px 100%"
+unfocus = "hide"
+lazy = true
+
+[scratchpads.betterbird]
+animation = "fromTop"
+command = "betterbird"
+class = "eu.betterbird.Betterbird"
+size = "70% 90%"
+max_size = "1920px 100%"
+lazy = true
+
+[shortcuts_menu.entries]
+
+"Fetch window" = "pypr fetch_client_menu"
+
+"Color picker" = [
+    {name="format", options=["hex", "rgb", "hsv", "hsl", "cmyk"]},
+    "sleep 0.2; hyprpicker --format [format] | wl-copy" # sleep to let the menu close before the picker opens
+]

@@ -1,0 +1,9 @@
+---
+rules:
+  - name: Poco F3 Screen Copy
+    command: scrcpy --select-usb
+    match:
+      on: Add
+      devices:
+      - include_devices: /home/maxime/.config/hypr/scripts/usbwatch_pocof3.yml
+      - include_devices: /home/maxime/.config/hypr/scripts/usbwatch_edge60.yml

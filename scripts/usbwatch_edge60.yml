@@ -1,0 +1,13 @@
+---
+devices:
+  - ID_MODEL: motorola_edge_60
+    ID_MODEL_ENC: motorola\x20edge\x2060
+    ID_MODEL_ID: '2e81'
+    ID_SERIAL: motorola_motorola_edge_60_ZY22LDVBR8
+    ID_SERIAL_SHORT: ZY22LDVBR8
+    ID_VENDOR: motorola
+    ID_VENDOR_ENC: motorola
+    ID_VENDOR_FROM_DATABASE: Motorola PCS
+    ID_VENDOR_ID: 22b8
+    PRODUCT: 22b8/2e81/601
+
