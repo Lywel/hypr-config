@@ -6,6 +6,8 @@ handle_windowtitlev2 () {
   windowaddress=${1%,*}
   windowtitle=${1#*,}
 
+  echo " -> Handling windowtitlev2: $windowtitle (address: 0x$windowaddress)"
+
   case $windowtitle in
     *"(Bitwarden"*"Password Manager) - Bitwarden"*)
       hyprctl --batch \
@@ -14,7 +16,9 @@ handle_windowtitlev2 () {
         "dispatch centerwindow"
       ;;
 
-    "Connexion : comptes Google —"* | "Sign In - Google Accounts —"*)
+    "Connexion : comptes Google —"* |\
+      "Sign In - Google Accounts — "* |\
+      "Sign in - Google Accounts - Helium")
       hyprctl --batch \
         "dispatch togglefloating address:0x$windowaddress;"\
         "dispatch resizewindowpixel exact 25% 54%,address:0x$windowaddress;"\
@@ -27,13 +31,16 @@ handle_windowtitlev2 () {
         "dispatch resizewindowpixel exact 25% 54%,address:0x$windowaddress;"\
         "dispatch centerwindow"
       ;;
-    *) echo "unhandled event: windowtitlev2>>$1" ;;
+
+    *) echo " -> No matching title" ;;
   esac
 }
 
 handle_fullscreen () {
   is_fullscreen="$1"
   monitor_nb=$(($(hyprctl monitors -j | jq length)+0))
+
+  echo " -> Handling fullscreen: $is_fullscreen on $monitor_nb monitors"
 
   case $is_fullscreen in
     1)
@@ -63,11 +70,13 @@ handle() {
   event=${1%>>*}
   data=${1#*>>}
 
+  echo "event: $event>>$data"
+
   case $event in
     windowtitlev2) handle_windowtitlev2 "$data";;
     fullscreen) handle_fullscreen "$data";;
 #   anyotherevent) handle_otherevent "$data";;
-    *) echo "unhandled event: $event>>$data" ;;
+    *) echo " -> unhandled" ;;
   esac
 }
 
