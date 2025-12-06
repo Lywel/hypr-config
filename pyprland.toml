@@ -10,7 +10,7 @@ plugins = [
 
 [scratchpads.beeper]
 animation = "fromTop"
-command = "beeper"
+command = "uwsm-app -- beeper"
 class = "Beeper"
 size = "55% 80%"
 max_size = "1080px 100%"
@@ -19,7 +19,7 @@ lazy = true
 
 [scratchpads.betterbird]
 animation = "fromTop"
-command = "betterbird"
+command = "uwsm-app -- betterbird"
 class = "eu.betterbird.Betterbird"
 size = "70% 90%"
 max_size = "1920px 100%"
