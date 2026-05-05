@@ -51,16 +51,20 @@ local function match_any(s, patterns)
 end
 
 local function float_center_resize(addr, w, h)
-  hl.dispatch_raw(([[togglefloating address:0x%s ; ]] ..
-    [[resizewindowpixel exact %s %s,address:0x%s ; ]] ..
-    [[centerwindow]]):format(addr, w, h, addr))
+  -- The window-targeted variants of float/resize/center don't have a
+  -- documented Lua arg shape yet, so use exec_raw for the chained dispatch.
+  -- addr already arrives as a hex string (e.g. "0x55..."); pass through.
+  hl.dispatch(hl.dsp.exec_raw(
+    ("togglefloating address:%s ; resizewindowpixel exact %s %s,address:%s ; centerwindow")
+    :format(addr, w, h, addr)
+  ))
 end
 
-hl.on("window.title", function(ev)
-  local title = ev.title or ""
+hl.on("window.title", function(w)
+  local title = w.title or ""
   for _, rule in ipairs(float_rules) do
     if match_any(title, rule.patterns) then
-      float_center_resize(ev.address, rule.width, rule.height)
+      float_center_resize(w.address, rule.width, rule.height)
       return
     end
   end
@@ -72,15 +76,13 @@ end)
 -- ----------------------------------------------------------------------
 
 local function monitor_count()
-  local p = io.popen("hyprctl monitors -j | jq length")
-  if not p then return 1 end
-  local n = tonumber((p:read("*l") or "1")) or 1
-  p:close()
-  return n
+  local mons = hl.get_monitors()
+  return mons and #mons or 1
 end
 
-hl.on("window.fullscreen", function(ev)
-  local entered = ev.state == 1 or ev.state == true
+hl.on("window.fullscreen", function(w)
+  -- Window.fullscreen is an integer (0=none, 1=maximize, 2=fullscreen).
+  local entered = (w.fullscreen or 0) > 0
   if entered then
     util.show_bar("bar-1", false)
     util.show_bar("bar-0", monitor_count() > 1)
