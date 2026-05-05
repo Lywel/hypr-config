@@ -1,16 +1,144 @@
--- Window rules. Includes the 3 stray windowrule blocks formerly in
--- hyprland.conf (suppress-maximize-events, fix-xwayland-drags, move-hyprland-run).
+-- Window rules.
+--
+-- Style: bucket rules by their shape, drive them from data tables, fall back to
+-- explicit calls only for the genuinely one-of-a-kind specimens.
 
--- Suppress maximize events globally. The duplicate from windowrules.conf:102
--- has been removed; this single block is the authoritative one.
-hl.window_rule({
+local rule = hl.window_rule
+
+-- ======================================================================
+-- Class-only floats
+-- ======================================================================
+
+local float_classes = {
+  "hyprland-share-picker", "eu.betterbird.Betterbird", "scrcpy",
+  "org.kde.kdeconnect.daemon", "org.kde.kdeconnect.handler",
+  "org.kde.kdeconnect.app", "org.freedesktop.impl.portal.desktop.kde",
+  "qv4l2", "Waydroid", "Cadence", "org.gnome.Evolution", "Catia",
+  "Jack-keyboard", "Ledger Live", "mpv", "clipse",
+  "com.saivert.pwvucontrol", "com.usebottles.bottles", "cpupower-gui",
+  "electron", "insta360 studio.exe", ".*\\.exe", "nm-connection-editor",
+  "org.gabmus.whatip", "org.gnome.Nautilus", "org.gnome.seahorse.Application",
+  "org.prismlauncher.PrismLauncher", "rdesktop", "xdg-desktop-portal-gtk",
+  "Chromium", "io.missioncenter.MissionCenter", "Matplotlib", "QjackCtl",
+  "com.github.wwmm.easyeffects", "YouTube Music", "imv",
+}
+for _, cls in ipairs(float_classes) do
+  rule({ match = { class = "^(" .. cls .. ")$" }, float = true })
+end
+
+-- ======================================================================
+-- Class-only "center"
+-- ======================================================================
+
+local center_classes = {
+  "UltiMaker-Cura", "QjackCtl", "com.github.wwmm.easyeffects",
+  "YouTube Music", "Matplotlib", "imv",
+}
+for _, cls in ipairs(center_classes) do
+  rule({ match = { class = "^(" .. cls .. ")$" }, center = true })
+end
+
+-- ======================================================================
+-- Title-only floats
+-- ======================================================================
+
+local float_titles = {
+  "Open File", "Zoom Workplace", "Bluetooth Devices", "Dolphin 2412",
+  "EspNow Lights", "Picture-in-Picture", "blueman-manager",
+}
+for _, t in ipairs(float_titles) do
+  rule({ match = { title = "^(" .. t .. ")$" }, float = true })
+end
+
+-- ======================================================================
+-- "immediate" (tearing-friendly games / fullscreen apps)
+-- ======================================================================
+
+local immediate_classes = { "tunic.exe", "dev.suyu_emu.suyu", "org.eden_emu.eden", "Ryujinx" }
+local immediate_titles  = { "Overwatch", "Sword Of The Sea", "Trackmania" }
+
+for _, cls in ipairs(immediate_classes) do
+  rule({ match = { class = "^(" .. cls .. ")$" }, immediate = true })
+end
+for _, t in ipairs(immediate_titles) do
+  rule({ match = { title = "^(" .. t .. ")$" }, immediate = true })
+end
+
+-- ======================================================================
+-- Multi-property apps (float + center + size, etc.)
+-- ======================================================================
+
+---@class WindowSpec
+---@field by      "class"|"title"
+---@field name    string                  identifier (becomes regex ^(name)$)
+---@field float?  boolean
+---@field center? boolean
+---@field size?   string                  "W H"
+---@field extras? table[]                 list of additional rule({...}) bodies (arbitrary keys)
+
+---@type WindowSpec[]
+local app_specs = {
+  -- Bitwarden initial popup. The dynamic-resize for the post-load title is
+  -- handled in lua/events.lua.
+  { by = "title", name = "Bitwarden",   float = true, center = true,     size = "920 780" },
+
+  -- Ledger Live: float + fixed size.
+  { by = "class", name = "Ledger Live", float = true, size = "1368 1026" },
+
+  -- Minecraft: float, center, dim, immediate, fixed size.
+  {
+    by = "title",
+    name = "Minecraft",
+    float = true,
+    center = true,
+    size = "2200 1300",
+    extras = { { dim_around = true }, { immediate = true } },
+  },
+
+  -- clipse picker.
+  { by = "class", name = "clipse", float = true, size = "622 652" },
+
+  -- Hidden wezterm helper window: float + pin + dim + size + always-focus.
+  {
+    by = "class",
+    name = "wezterm_hidden",
+    float = true,
+    center = true,
+    size = "360 40",
+    extras = {
+      { pin = true },
+      { stay_focused = true },
+      { dim_around = true },
+    },
+  },
+}
+
+for _, s in ipairs(app_specs) do
+  local match = { [s.by] = "^(" .. s.name .. ")$" }
+  -- Each property of the spec becomes its own one-property rule (Hyprland
+  -- prefers single-property rules; multi-property rules don't always merge).
+  if s.float then rule({ match = match, float = true }) end
+  if s.center then rule({ match = match, center = true }) end
+  if s.size then rule({ match = match, size = s.size }) end
+  for _, extra in ipairs(s.extras or {}) do
+    extra.match = match
+    rule(extra)
+  end
+end
+
+-- ======================================================================
+-- One-of-a-kind rules
+-- ======================================================================
+
+-- Suppress maximize events globally.
+rule({
   name = "suppress-maximize-events",
   match = { class = ".*" },
   suppress_event = "maximize",
 })
 
--- Fix some dragging issues with XWayland.
-hl.window_rule({
+-- Fix XWayland drag glitches.
+rule({
   name = "fix-xwayland-drags",
   match = {
     class = "^$",
@@ -23,23 +151,15 @@ hl.window_rule({
   no_focus = true,
 })
 
--- Hyprland-run: bottom-left positioning.
-hl.window_rule({
+-- Hyprland-run launcher: bottom-left positioning.
+rule({
   name = "move-hyprland-run",
   match = { class = "hyprland-run" },
   move = "20 monitor_h-120",
   float = true,
 })
 
--- ===== Generic class/title rules (from former windowrules.conf) =====
-
-local function rule(t) hl.window_rule(t) end
-
-rule({ match = { class = "^$", title = "^$" }, no_blur = true })
-rule({ match = { title = "^(Overwatch)$" }, immediate = true })
-rule({ match = { title = "^(Open File)$" }, float = true })
-rule({ match = { title = "^(Zoom Workplace)$" }, float = true })
-
+-- Steam Proton overlay: kill all decorations.
 rule({
   name = "Steam Proton",
   match = { class = "steam_proton" },
@@ -50,88 +170,17 @@ rule({
   rounding = 0,
 })
 
-rule({ match = { title = "^(Sword Of The Sea)$" }, immediate = true })
-rule({ match = { class = "^(tunic.exe)$" }, immediate = true })
-rule({ match = { class = "^(dev.suyu_emu.suyu)$" }, immediate = true })
-rule({ match = { class = "^(org.eden_emu.eden)$" }, immediate = true })
-rule({ match = { class = "^(Ryujinx)$" }, immediate = true })
-rule({ match = { title = "^(Trackmania)$" }, immediate = true })
-rule({ match = { class = "^(UltiMaker-Cura)$" }, center = true })
-rule({ match = { class = "^(hyprland-share-picker)$" }, float = true })
-rule({ match = { class = "^(eu.betterbird.Betterbird)$" }, float = true })
-rule({ match = { class = "^(Matplotlib)$" }, float = true })
-rule({ match = { class = "^(Matplotlib)$" }, center = true })
-rule({ match = { class = "^(imv)$" }, float = true })
-rule({ match = { class = "^(imv)$" }, center = true })
-rule({ match = { class = "^(imv)$" }, size = "1920 1080" })
-rule({ match = { class = "^(scrcpy)$" }, float = true })
-rule({ match = { class = "^(org.kde.kdeconnect.daemon)$" }, float = true })
-rule({ match = { class = "^(org.kde.kdeconnect.handler)$" }, float = true })
-rule({ match = { class = "^(qv4l2)$" }, float = true })
-rule({ match = { class = "^(org.kde.kdeconnect.app)$" }, float = true })
-rule({ match = { class = "^(org.freedesktop.impl.portal.desktop.kde)$" }, float = true })
-rule({ match = { class = "^(Waydroid)$" }, float = true })
+-- No-blur on completely empty class+title (avoids wasting blur on transients).
+rule({ match = { class = "^$", title = "^$" }, no_blur = true })
 
--- Bitwarden: float + center + size. Note: dynamic_float (events.lua) also
--- applies a percentage-based resize when title changes after the password
--- manager finishes loading; this rule covers the initial window.
-rule({ match = { title = "^(Bitwarden)$" }, float = true })
-rule({ match = { title = "^(Bitwarden)$" }, center = true })
-rule({ match = { title = "^(Bitwarden)$" }, size = "920 780" })
-
-rule({ match = { title = "^(Bluetooth Devices)$" }, float = true })
-rule({ match = { class = "^(Cadence)$" }, float = true })
-rule({ match = { class = "^(org.gnome.Evolution)$" }, float = true })
-rule({ match = { class = "^(Catia)$" }, float = true })
-rule({ match = { title = "^(Dolphin 2412)$" }, float = true })
-rule({ match = { title = "^(EspNow Lights)$" }, float = true })
-rule({ match = { class = "^(Jack-keyboard)$" }, float = true })
-rule({ match = { class = "^(Ledger Live)$" }, float = true })
-rule({ match = { class = "^(Ledger Live)$" }, size = "1368 1026" })
-rule({ match = { class = "^(mpv)$" }, float = true })
-rule({ match = { title = "^(Minecraft)$" }, center = true })
-rule({ match = { title = "^(Minecraft)$" }, dim_around = true })
-rule({ match = { title = "^(Minecraft)$" }, float = true })
-rule({ match = { title = "^(Minecraft)$" }, immediate = true })
-rule({ match = { title = "^(Minecraft)$" }, size = "2200 1300" })
-rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })
-rule({ match = { class = "^(QjackCtl)$" }, center = true })
-rule({ match = { class = "^(QjackCtl)$" }, float = true })
+-- Sticky-focus window naming convention.
 rule({ match = { title = "^(.*opfullpath.*)$" }, stay_focused = true })
 
-rule({ match = { class = "^(YouTube Music)$" }, center = true })
-rule({ match = { class = "^(YouTube Music)$" }, float = true })
-rule({ match = { title = "^(blueman-manager)$" }, float = true })
-rule({ match = { class = "^(clipse)$" }, float = true })
-rule({ match = { class = "^(clipse)$" }, size = "622 652" })
+-- Specific compound matchers.
 rule({ match = { class = "^(com.github.Aylur.ags)$", title = "Settings$" }, float = true })
-rule({ match = { class = "^(com.github.wwmm.easyeffects)$" }, center = true })
-rule({ match = { class = "^(com.github.wwmm.easyeffects)$" }, float = true })
-rule({ match = { class = "^(com.saivert.pwvucontrol)$" }, float = true })
-rule({ match = { class = "^(com.usebottles.bottles)$" }, float = true })
-rule({ match = { class = "^(contour)$" }, max_size = "2468 1425" })
-rule({ match = { class = "^(cpupower-gui)$" }, float = true })
-rule({ match = { class = "^(electron)$" }, float = true })
-rule({ match = { class = "^(firefox-nightly)$" }, max_size = "2468 1425" })
 rule({ match = { class = "^(firefox-nightly)$", title = "^$" }, float = true })
-rule({ match = { class = "^(insta360 studio.exe)$" }, float = true })
-rule({ match = { class = "^(.*\\.exe)$" }, float = true })
-rule({ match = { class = "^(nm-connection-editor)$" }, float = true })
-rule({ match = { class = "^(org.gabmus.whatip)$" }, float = true })
-rule({ match = { class = "^(org.gnome.Nautilus)$" }, float = true })
-rule({ match = { class = "^(org.gnome.seahorse.Application)$" }, float = true })
-rule({ match = { class = "^(org.prismlauncher.PrismLauncher)$" }, float = true })
 rule({ match = { class = "^(python3)$", title = "^(Tor Browser)$" }, float = true })
-rule({ match = { class = "^(rdesktop)$" }, float = true })
 
-rule({ match = { class = "^(wezterm_hidden)$" }, float = true })
-rule({ match = { class = "^(wezterm_hidden)$" }, size = "360 40" })
-rule({ match = { class = "^(wezterm_hidden)$" }, center = true })
-rule({ match = { class = "^(wezterm_hidden)$" }, pin = true })
-rule({ match = { class = "^(wezterm_hidden)$" }, stay_focused = true })
-rule({ match = { class = "^(wezterm_hidden)$" }, dim_around = true })
-
-rule({ match = { class = "^(xdg-desktop-portal-gtk)$" }, float = true })
-
-rule({ match = { class = "Chromium" }, float = true })
-rule({ match = { class = "io.missioncenter.MissionCenter" }, float = true })
+-- Per-class size caps.
+rule({ match = { class = "^(contour)$" }, max_size = "2468 1425" })
+rule({ match = { class = "^(firefox-nightly)$" }, max_size = "2468 1425" })

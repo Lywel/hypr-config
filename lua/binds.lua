@@ -1,236 +1,244 @@
 -- Keybindings, mouse binds, gestures, submaps.
 --
--- HY3 FALLBACK TOGGLE:
--- When hy3 breaks (which happens periodically, flooding the screen with
--- error popups), set USE_HY3 = false here, save, reload Hyprland.
--- That swap activates the vanilla equivalents (movefocus/movewindow/
--- killactive/movetoworkspace) so the system stays usable until hy3
--- gets fixed upstream.
+-- Style: neovim-inspired. Each section is a list of { lhs, rhs, opts?, desc? }
+-- consumed by a single map() helper. Adding/removing/grepping a bind is a
+-- one-line change.
+--
+-- HY3 FALLBACK TOGGLE
+-- ===================
+-- hy3 breaks periodically and floods the screen with error popups when it does.
+-- The fallback bindset (vanilla movefocus/movewindow/...) is intentionally
+-- preserved so flipping this flag rescues the system without further edits.
+
 local USE_HY3 = true
 
 local util = require("lua.util")
 local A = require("lua.apps")
 
-local mainMod = A.mainMod
-local launch  = A.launch
+local mod   = A.mainMod
+local mod_S = mod .. " SHIFT"
+local mod_A = mod .. " ALT"
+local mod_C = mod .. " CTRL"
 
--- Convenience wrapper: shell exec with uwsm-app prefix.
-local function app(cmd) return hl.dsp.exec(launch .. " " .. cmd) end
-local function sh(cmd)  return hl.dsp.exec(cmd) end
+-- ======================================================================
+-- Helpers
+-- ======================================================================
+
+--- Apply a list of bindings.
+--- Each entry is { lhs, rhs, opts?, desc? }.
+--- rhs may be a dispatcher table (from hl.dsp.*), a string (treated as raw
+--- dispatch), or a Lua function.
+local function map(bindings)
+  for _, b in ipairs(bindings) do
+    local lhs, rhs, opts = b[1], b[2], b[3]
+    hl.bind(lhs, rhs, opts)
+  end
+end
+
+local function exec(cmd)        return hl.dsp.exec(cmd) end
+local function app(cmd)         return hl.dsp.exec(A.launch .. " " .. cmd) end
+local function raw(s)           return hl.dispatch_raw(s) end
+local function focus_dir(d)     return hl.dsp.focus({ direction = d }) end
+local function move_dir(d)      return hl.dsp.window.move({ direction = d }) end
+local function move_ws(ws)      return hl.dsp.window.move({ workspace = ws }) end
+local function focus_ws(ws)     return hl.dsp.focus({ workspace = ws }) end
+
+local LOCKED   = { locked = true }
+local LOCKED_R = { locked = true, repeating = true }
+local MOUSE    = { mouse = true }
 
 -- ======================================================================
 -- System / session
 -- ======================================================================
 
--- Lid switch + manual lock.
-hl.bind("switch:Lid Switch", sh(A.lock), { locked = true })
-hl.bind(mainMod .. " SHIFT + L", sh(A.lock), { locked = true })
+map({
+  { "switch:Lid Switch",   exec(A.lock),     LOCKED, "Lock on lid close" },
+  { mod_S .. " + L",       exec(A.lock),     LOCKED, "Lock session" },
+  { mod   .. " + ESCAPE",  exec("uwsm stop"),         nil, "Quit Hyprland (uwsm)" },
 
--- Quit Hyprland session via uwsm (safe shutdown path).
-hl.bind(mainMod .. " + ESCAPE", sh("uwsm stop"))
-
--- Standing-desk control (linak).
-hl.bind("SHIFT_R + UP",
-  sh("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to stand"))
-hl.bind("SHIFT_R + DOWN",
-  sh("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to sit"))
+  -- Standing desk (linak).
+  { "SHIFT_R + UP",   exec("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to stand"), nil, "Desk: stand" },
+  { "SHIFT_R + DOWN", exec("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to sit"),   nil, "Desk: sit" },
+})
 
 -- ======================================================================
 -- Application launchers
 -- ======================================================================
 
-hl.bind(mainMod .. " + E",         app(A.file_manager))
-hl.bind(mainMod .. " + SPACE",     sh(A.menu))
-hl.bind(mainMod .. " + RETURN",    app(A.terminal))
-hl.bind(mainMod .. " ALT + RETURN", app(A.browser))
-hl.bind(mainMod .. " ALT + 1",     app("gtk-launch helium-work"))
+map({
+  { mod   .. " + E",       app(A.file_manager),         nil, "File manager" },
+  { mod   .. " + SPACE",   exec(A.menu),                nil, "App menu (tofi)" },
+  { mod   .. " + RETURN",  app(A.terminal),             nil, "Terminal" },
+  { mod_A .. " + RETURN",  app(A.browser),              nil, "Browser" },
+  { mod_A .. " + 1",       app("gtk-launch helium-work"), nil, "Helium (work)" },
 
--- Screenshots.
-hl.bind(mainMod .. " + Print", app("hyprshot -m region -z"))
-hl.bind(mainMod .. " + F6",    app("hyprshot -m region -z"))
+  { mod   .. " + Print",   app("hyprshot -m region -z"), nil, "Screenshot" },
+  { mod   .. " + F6",      app("hyprshot -m region -z"), nil, "Screenshot" },
 
--- Window picker via tofi.
-hl.bind(mainMod .. " + W", sh(
-  [[hyprctl clients -j | jq -r '.[] | select(.mapped==true) | (.class + "|" + .title)' ]] ..
-  [[| column -s'|' --table --table-columns-limit 2 ]] ..
-  [[| tofi | cut -d' ' -f1 | xargs -I{} hyprctl dispatch focuswindow 'class:{}']]
-))
+  -- Hyprland-aware window picker.
+  { mod   .. " + W", exec(
+      [[hyprctl clients -j | jq -r '.[] | select(.mapped==true) | (.class + "|" + .title)' ]] ..
+      [[| column -s'|' --table --table-columns-limit 2 ]] ..
+      [[| tofi | cut -d' ' -f1 | xargs -I{} hyprctl dispatch focuswindow 'class:{}']]
+    ), nil, "Pick window via tofi" },
 
--- Force-kill focused window.
-hl.bind(mainMod .. " + X", sh("hyprctl kill"))
+  { mod   .. " + X",       exec("hyprctl kill"),                                              nil, "Force-kill window" },
+  { "Print",               exec("pgrep hyprsunset && pkill hyprsunset || hyprsunset -t 2500"), nil, "Toggle hyprsunset" },
 
--- Hyprsunset toggle (without mainMod).
-hl.bind("Print", sh("pgrep hyprsunset && pkill hyprsunset || hyprsunset -t 2500"))
+  { mod   .. " + EQUAL",   exec("hyprpanel --toggle-window=bar-0 && hyprpanel --toggle-window=bar-1"),   nil, "Toggle bars" },
+  { mod_S .. " + EQUAL",   exec([[test -n "$(hyprpanel -l)" && hyprpanel -q || hyprctl dispatch exec hyprpanel]]), nil, "Restart hyprpanel" },
 
--- Hyprpanel toggle.
-hl.bind(mainMod .. " + EQUAL",
-  sh("hyprpanel --toggle-window=bar-0 && hyprpanel --toggle-window=bar-1"))
-hl.bind(mainMod .. " SHIFT + EQUAL",
-  sh([[test -n "$(hyprpanel -l)" && hyprpanel -q || hyprctl dispatch exec hyprpanel]]))
+  { mod                .. " + P", exec("tuned-adm profile laptop-battery-powersave"),  nil, "Tuned: powersave" },
+  { mod_S              .. " + P", exec("tuned-adm profile balanced-battery"),          nil, "Tuned: balanced" },
+  { mod .. " CTRL SHIFT + P",     exec("tuned-adm profile throughput-performance"),    nil, "Tuned: performance" },
 
--- tuned-adm power profiles.
-hl.bind(mainMod .. " + P",            sh("tuned-adm profile laptop-battery-powersave"))
-hl.bind(mainMod .. " SHIFT + P",      sh("tuned-adm profile balanced-battery"))
-hl.bind(mainMod .. " CTRL SHIFT + P", sh("tuned-adm profile throughput-performance"))
-
--- Gamemode toggle (Lua port, replaces scripts/gamemode.sh).
-hl.bind(mainMod .. " + G", function() util.toggle_gamemode() end)
-
--- Screen recording (still a shell script).
-hl.bind(mainMod .. " SHIFT + Print", sh("~/.config/hypr/scripts/screen-record.sh"))
-
--- Yeelights.
-hl.bind(mainMod .. " + XF86AudioMedia",
-  sh("~/.config/hypr/scripts/yeelights.sh on &> /tmp/main.log"))
-hl.bind(mainMod .. " SHIFT + XF86AudioMedia",
-  sh("~/.config/hypr/scripts/yeelights.sh off &> /tmp/shift_main.log"))
+  { mod   .. " + G",            function() util.toggle_gamemode() end,                                          nil, "Toggle gamemode" },
+  { mod_S .. " + Print",        exec("~/.config/hypr/scripts/screen-record.sh"),                                 nil, "Screen record" },
+  { mod   .. " + XF86AudioMedia", exec("~/.config/hypr/scripts/yeelights.sh on  &> /tmp/main.log"),              nil, "Yeelights on" },
+  { mod_S .. " + XF86AudioMedia", exec("~/.config/hypr/scripts/yeelights.sh off &> /tmp/shift_main.log"),        nil, "Yeelights off" },
+})
 
 -- ======================================================================
 -- Window state
 -- ======================================================================
 
--- forcerendererreload is not (yet) in the new dispatcher namespace; use raw.
-hl.bind(mainMod .. " + R", hl.dispatch_raw("forcerendererreload"))
+map({
+  -- forcerendererreload is not in the new dispatcher namespace; raw.
+  { mod   .. " + R", raw("forcerendererreload"),                       nil, "Reload renderer" },
+  { mod_S .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }),nil, "Fullscreen" },
+  { mod   .. " + F", hl.dsp.window.center(),                           nil, "Center window" },
 
-hl.bind(mainMod .. " SHIFT + F",
-  hl.dsp.window.fullscreen({ mode = "fullscreen" }))
-hl.bind(mainMod .. " + F", hl.dsp.window.center())
-
--- pypr layout-center.
-hl.bind(mainMod .. " + C",     sh("pypr layout_center toggle"))
-hl.bind(mainMod .. " + left",  sh("pypr layout_center prev"))
-hl.bind(mainMod .. " + right", sh("pypr layout_center next"))
+  -- pypr layout-center.
+  { mod   .. " + C",     exec("pypr layout_center toggle"), nil, "pypr center toggle" },
+  { mod   .. " + left",  exec("pypr layout_center prev"),   nil, "pypr center prev" },
+  { mod   .. " + right", exec("pypr layout_center next"),   nil, "pypr center next" },
+})
 
 -- ======================================================================
--- Movement / workspaces
+-- Movement / workspaces (USE_HY3-aware)
 -- ======================================================================
--- The block below has TWO halves:
---   * USE_HY3 = false  -> vanilla focus / move dispatchers
---   * USE_HY3 = true   -> hy3:* equivalents via dispatch_raw
--- Last bind wins on a given key, so we register only the active half.
+--
+-- Each direction has up to two keys (arrow + vim). The same data drives both
+-- focus and window-move bindings. Last bind on a key wins, so we register
+-- exactly one of the hy3 / vanilla halves.
 
-if not USE_HY3 then
-  -- Vanilla fallback (current keybinds.conf:49-74).
-  hl.bind(mainMod .. " + Q", hl.dsp.window.close())
+local DIRECTIONS = {
+  -- { keys[],            vanilla,  hy3      }
+  { { "h", "left"  },     "l",      "left"   },
+  { { "l", "right" },     "r",      "right"  },
+  { { "j", "down"  },     "d",      "down"   },
+  { { "k", "up"    },     "u",      "up"     },
+}
 
-  hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "d" }))
-  hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "l" }))
-  hl.bind(mainMod .. " + h",     hl.dsp.focus({ direction = "l" }))
-  hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "r" }))
-  hl.bind(mainMod .. " + l",     hl.dsp.focus({ direction = "r" }))
-  hl.bind(mainMod .. " + j",     hl.dsp.focus({ direction = "d" }))
-  hl.bind(mainMod .. " + k",     hl.dsp.focus({ direction = "u" }))
-  hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "u" }))
-
-  hl.bind(mainMod .. " SHIFT + 0", hl.dsp.window.move({ workspace = "10" }))
-  for i = 1, 9 do
-    hl.bind(mainMod .. " SHIFT + " .. i,
-      hl.dsp.window.move({ workspace = tostring(i) }))
+local function for_each_direction(fn)
+  for _, dir in ipairs(DIRECTIONS) do
+    for _, key in ipairs(dir[1]) do
+      fn(key, dir[2], dir[3])
+    end
   end
+end
 
-  hl.bind(mainMod .. " ALT + down",  hl.dsp.window.move({ direction = "d" }))
-  hl.bind(mainMod .. " ALT + h",     hl.dsp.window.move({ direction = "l" }))
-  hl.bind(mainMod .. " ALT + l",     hl.dsp.window.move({ direction = "r" }))
-  hl.bind(mainMod .. " ALT + left",  hl.dsp.window.move({ direction = "l" }))
-  hl.bind(mainMod .. " ALT + right", hl.dsp.window.move({ direction = "r" }))
-  hl.bind(mainMod .. " ALT + up",    hl.dsp.window.move({ direction = "u" }))
+local movement = {}
+
+if USE_HY3 then
+  -- hy3 grouping + kill.
+  -- TODO: VERIFY POST-UPGRADE — hy3 dispatchers may move from raw strings to
+  -- a dedicated Lua namespace (e.g. hl.plugins.hy3.*).
+  movement = {
+    { mod   .. " + v", raw("hy3:makegroup, v, force_ephemeral"),   nil, "hy3: vsplit group" },
+    { mod   .. " + b", raw("hy3:makegroup, h, force_ephemeral"),   nil, "hy3: hsplit group" },
+    { mod   .. " + t", raw("hy3:makegroup, tab, toggle"),          nil, "hy3: tab group" },
+    { mod   .. " + Q", raw("hy3:killactive"),                      nil, "hy3: kill" },
+    { mod_S .. " + k", raw("hy3:changefocus, raise"),              nil, "hy3: raise focus" },
+  }
+  for_each_direction(function(key, _vanilla, h)
+    movement[#movement+1] = { mod   .. " + "  .. key, raw("hy3:movefocus, "  .. h) }
+    movement[#movement+1] = { mod_A .. " + "  .. key, raw("hy3:movewindow, " .. h) }
+  end)
+  for i = 1, 9 do
+    movement[#movement+1] = { mod_S .. " + " .. i, raw(("hy3:movetoworkspace, %d, follow"):format(i)) }
+  end
 else
-  -- hy3 path (current keybinds.conf:76-105).
-  -- TODO: VERIFY POST-UPGRADE. Plugin dispatchers may move to a Lua
-  -- namespace like hl.plugins.hy3.* instead of dispatch_raw.
-  hl.bind(mainMod .. " + v", hl.dispatch_raw("hy3:makegroup, v, force_ephemeral"))
-  hl.bind(mainMod .. " + b", hl.dispatch_raw("hy3:makegroup, h, force_ephemeral"))
-  hl.bind(mainMod .. " + t", hl.dispatch_raw("hy3:makegroup, tab, toggle"))
-  hl.bind(mainMod .. " + Q", hl.dispatch_raw("hy3:killactive"))
-
-  hl.bind(mainMod .. " + h",     hl.dispatch_raw("hy3:movefocus, left"))
-  hl.bind(mainMod .. " + j",     hl.dispatch_raw("hy3:movefocus, down"))
-  hl.bind(mainMod .. " + k",     hl.dispatch_raw("hy3:movefocus, up"))
-  hl.bind(mainMod .. " + l",     hl.dispatch_raw("hy3:movefocus, right"))
-  hl.bind(mainMod .. " + down",  hl.dispatch_raw("hy3:movefocus, down"))
-  hl.bind(mainMod .. " + left",  hl.dispatch_raw("hy3:movefocus, left"))
-  hl.bind(mainMod .. " + right", hl.dispatch_raw("hy3:movefocus, right"))
-  hl.bind(mainMod .. " + up",    hl.dispatch_raw("hy3:movefocus, up"))
-
-  hl.bind(mainMod .. " ALT + h",     hl.dispatch_raw("hy3:movewindow, left"))
-  hl.bind(mainMod .. " ALT + j",     hl.dispatch_raw("hy3:movewindow, down"))
-  hl.bind(mainMod .. " ALT + k",     hl.dispatch_raw("hy3:movewindow, up"))
-  hl.bind(mainMod .. " ALT + l",     hl.dispatch_raw("hy3:movewindow, right"))
-  hl.bind(mainMod .. " ALT + down",  hl.dispatch_raw("hy3:movewindow, down"))
-  hl.bind(mainMod .. " ALT + left",  hl.dispatch_raw("hy3:movewindow, left"))
-  hl.bind(mainMod .. " ALT + right", hl.dispatch_raw("hy3:movewindow, right"))
-  hl.bind(mainMod .. " ALT + up",    hl.dispatch_raw("hy3:movewindow, up"))
-
-  hl.bind(mainMod .. " SHIFT + k", hl.dispatch_raw("hy3:changefocus, raise"))
-
+  movement = {
+    { mod .. " + Q", hl.dsp.window.close(), nil, "Close window" },
+  }
+  for_each_direction(function(key, v, _h)
+    movement[#movement+1] = { mod   .. " + " .. key, focus_dir(v) }
+    movement[#movement+1] = { mod_A .. " + " .. key, move_dir(v)  }
+  end)
   for i = 1, 9 do
-    hl.bind(mainMod .. " SHIFT + " .. i,
-      hl.dispatch_raw("hy3:movetoworkspace, " .. i .. ", follow"))
+    movement[#movement+1] = { mod_S .. " + " .. i, move_ws(tostring(i)) }
   end
+  movement[#movement+1] = { mod_S .. " + 0", move_ws("10") }
 end
 
--- ======================================================================
--- pypr scratchpads / zoom / menu
--- ======================================================================
-
-hl.bind(mainMod .. " + Z",             sh("pypr zoom ++0.17"))
-hl.bind(mainMod .. " SHIFT + Z",       sh("pypr zoom"))
-hl.bind(mainMod .. " + semicolon",     sh("pypr menu"))
-hl.bind("ALT_R + B",                   sh("pypr toggle beeper"))
-hl.bind("ALT_R + M",                   sh("pypr toggle betterbird"))
+map(movement)
 
 -- ======================================================================
--- Floating / layout / workspaces
+-- pypr (scratchpad / zoom / menu)
 -- ======================================================================
 
-hl.bind(mainMod .. " + O",      hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + SLASH",  hl.dsp.layout(""))
+map({
+  { mod   .. " + Z",         exec("pypr zoom ++0.17"), nil, "pypr zoom in" },
+  { mod_S .. " + Z",         exec("pypr zoom"),        nil, "pypr zoom reset" },
+  { mod   .. " + semicolon", exec("pypr menu"),        nil, "pypr menu" },
+  { "ALT_R + B",             exec("pypr toggle beeper"),    nil, "pypr: beeper" },
+  { "ALT_R + M",             exec("pypr toggle betterbird"),nil, "pypr: betterbird" },
+})
 
-hl.bind(mainMod .. " + 0", hl.dsp.focus({ workspace = "10" }))
+-- ======================================================================
+-- Floating / layout / workspace switching
+-- ======================================================================
+
+local workspace_binds = {
+  { mod   .. " + O",     hl.dsp.window.float({ action = "toggle" }), nil, "Toggle floating" },
+  { mod   .. " + SLASH", hl.dsp.layout(""),                          nil, "Layout msg" },
+  { mod   .. " + 0",     focus_ws("10") },
+
+  { mod_C .. " + right", focus_ws("e+1") },
+  { mod_C .. " + l",     focus_ws("e+1") },
+  { mod_C .. " + left",  focus_ws("e-1") },
+  { mod_C .. " + h",     focus_ws("e-1") },
+
+  -- Special workspace.
+  { mod   .. " + S",       hl.dsp.workspace.toggle_special("magic") },
+  { mod_S .. " + S",       exec("pypr toggle_special magic") },
+
+  -- Scroll wheel.
+  { mod   .. " + mouse_down", focus_ws("e+1") },
+  { mod   .. " + mouse_up",   focus_ws("e-1") },
+}
 for i = 1, 9 do
-  hl.bind(mainMod .. " + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
+  workspace_binds[#workspace_binds+1] = { mod .. " + " .. i, focus_ws(tostring(i)) }
 end
-
-hl.bind(mainMod .. " CTRL + right", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " CTRL + l",     hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " CTRL + left",  hl.dsp.focus({ workspace = "e-1" }))
-hl.bind(mainMod .. " CTRL + h",     hl.dsp.focus({ workspace = "e-1" }))
-
--- Special workspace (scratchpad).
-hl.bind(mainMod .. " + S",       hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " SHIFT + S", sh("pypr toggle_special magic"))
-
--- Scroll through workspaces with mainMod + scroll wheel.
-hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+map(workspace_binds)
 
 -- ======================================================================
--- Mouse binds (move/resize)
+-- Mouse binds
 -- ======================================================================
 
-hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
-hl.bind(mainMod .. " + Control_L", hl.dsp.window.drag(),   { mouse = true })
-hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize({ relative = true }), { mouse = true })
-hl.bind(mainMod .. " + ALT_L",     hl.dsp.window.resize(), { mouse = true })
+map({
+  { mod .. " + mouse:272", hl.dsp.window.drag(),                     MOUSE, "Drag window (LMB)" },
+  { mod .. " + Control_L", hl.dsp.window.drag(),                     MOUSE, "Drag window (Ctrl)" },
+  { mod .. " + mouse:273", hl.dsp.window.resize({ relative = true }), MOUSE, "Resize window (RMB)" },
+  { mod .. " + ALT_L",     hl.dsp.window.resize(),                   MOUSE, "Resize window (Alt)" },
+})
 
 -- ======================================================================
 -- Media keys
 -- ======================================================================
 
-hl.bind("XF86AudioNext",        sh("playerctl next"),       { locked = true })
-hl.bind("XF86AudioPlay",        sh("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPrev",        sh("playerctl previous"),   { locked = true })
-hl.bind("XF86AudioMute",        sh("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
-hl.bind("XF86AudioLowerVolume", sh("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
-  { locked = true, repeating = true })
-hl.bind("XF86AudioRaiseVolume", sh("wpctl set-volume --limit 1 @DEFAULT_AUDIO_SINK@ 5%+"),
-  { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown",
-  sh("brightnessctl --device='intel_backlight' --exponent=3 --min-value=1 set 5%-"),
-  { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessUp",
-  sh("brightnessctl --device='intel_backlight' --exponent=3 set +5%"),
-  { locked = true, repeating = true })
+map({
+  { "XF86AudioNext", exec("playerctl next"),                            LOCKED },
+  { "XF86AudioPlay", exec("playerctl play-pause"),                      LOCKED },
+  { "XF86AudioPrev", exec("playerctl previous"),                        LOCKED },
+  { "XF86AudioMute", exec("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),LOCKED },
+
+  { "XF86AudioLowerVolume",  exec("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),         LOCKED_R },
+  { "XF86AudioRaiseVolume",  exec("wpctl set-volume --limit 1 @DEFAULT_AUDIO_SINK@ 5%+"),LOCKED_R },
+  { "XF86MonBrightnessDown", exec("brightnessctl --device='intel_backlight' --exponent=3 --min-value=1 set 5%-"), LOCKED_R },
+  { "XF86MonBrightnessUp",   exec("brightnessctl --device='intel_backlight' --exponent=3 set +5%"),                LOCKED_R },
+})
 
 -- ======================================================================
 -- Gestures
@@ -239,16 +247,15 @@ hl.bind("XF86MonBrightnessUp",
 hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 
 -- ======================================================================
--- "clean" submap: disables all keybinds except the escape combo.
+-- Submaps
 -- ======================================================================
 
+-- "clean" disables every keybind except the escape combo.
 hl.define_submap("clean", function()
-  -- Only one bind in this submap: mainMod+SHIFT+GRAVE returns to default.
-  hl.bind(mainMod .. " SHIFT + GRAVE", hl.dsp.submap("reset"))
+  hl.bind(mod_S .. " + GRAVE", hl.dsp.submap("reset"))
 end)
 
--- Enter the clean submap.
-hl.bind(mainMod .. " SHIFT + GRAVE", hl.dsp.submap("clean"))
-
--- ALT+TAB cyclenext (lives outside any submap).
-hl.bind("ALT + TAB", hl.dsp.window.cycle_next())
+map({
+  { mod_S .. " + GRAVE", hl.dsp.submap("clean"),    nil, "Enter clean submap" },
+  { "ALT + TAB",         hl.dsp.window.cycle_next(),nil, "Cycle next window"  },
+})
