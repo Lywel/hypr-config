@@ -44,7 +44,6 @@ hl.config({
   },
 
   dwindle = {
-    pseudotile = true,
     preserve_split = true,
     smart_split = false,
     force_split = 2,
@@ -61,7 +60,6 @@ hl.config({
     force_default_wallpaper = -1,
     disable_hyprland_logo = false,
     on_focus_under_fullscreen = 2,
-    vfr = true,
     vrr = 2,
   },
 })

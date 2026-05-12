@@ -10,15 +10,15 @@
 -- The fallback bindset (vanilla movefocus/movewindow/...) is intentionally
 -- preserved so flipping this flag rescues the system without further edits.
 
-local USE_HY3 = true
+local USE_HY3 = false   -- hy3 fails to build on 0.55; flip back when fixed
 
 local util    = require("lua.util")
 local A       = require("lua.apps")
 
 local mod     = A.mainMod
-local mod_S   = mod .. " SHIFT"
-local mod_A   = mod .. " ALT"
-local mod_C   = mod .. " CTRL"
+local mod_S   = mod .. " + SHIFT"
+local mod_A   = mod .. " + ALT"
+local mod_C   = mod .. " + CTRL"
 
 -- ======================================================================
 -- Helpers
@@ -35,8 +35,8 @@ local function map(bindings)
   end
 end
 
-local function exec(cmd) return hl.dsp.exec(cmd) end
-local function app(cmd) return hl.dsp.exec(A.launch .. " " .. cmd) end
+local function exec(cmd) return hl.dsp.exec_raw(cmd) end
+local function app(cmd) return hl.dsp.exec_raw(A.launch .. " " .. cmd) end
 local function global(s) return hl.dsp.global(s) end
 local function focus_dir(d) return hl.dsp.focus({ direction = d }) end
 local function move_dir(d) return hl.dsp.window.move({ direction = d }) end
@@ -89,7 +89,7 @@ map({
 
   { mod .. " + P",                exec("tuned-adm profile laptop-battery-powersave"),                                     nil, "Tuned: powersave" },
   { mod_S .. " + P",              exec("tuned-adm profile balanced-battery"),                                             nil, "Tuned: balanced" },
-  { mod .. " CTRL SHIFT + P",     exec("tuned-adm profile throughput-performance"),                                       nil, "Tuned: performance" },
+  { mod .. " + CTRL + SHIFT + P",     exec("tuned-adm profile throughput-performance"),                                       nil, "Tuned: performance" },
 
   { mod .. " + G",                function() util.toggle_gamemode() end,                                                  nil, "Toggle gamemode" },
   { mod_S .. " + Print",          exec("~/.config/hypr/scripts/screen-record.sh"),                                        nil, "Screen record" },
@@ -219,7 +219,7 @@ map(workspace_binds)
 map({
   { mod .. " + mouse:272", hl.dsp.window.drag(),                      nil, "Drag window (LMB)" },
   { mod .. " + Control_L", hl.dsp.window.drag(),                      nil, "Drag window (Ctrl)" },
-  { mod .. " + mouse:273", hl.dsp.window.resize({ relative = true }), nil, "Resize window (RMB)" },
+  { mod .. " + mouse:273", hl.dsp.window.resize(),                    nil, "Resize window (RMB)" },
   { mod .. " + ALT_L",     hl.dsp.window.resize(),                    nil, "Resize window (Alt)" },
 })
 

@@ -12,28 +12,19 @@
 hl.config({
   plugin = {
     hy3 = {
-      autotile = {
-        enabled = true,
-        trigger_width = 855,
-        trigger_height = 500,
-      },
-      no_gaps_when_only = 1,
-      node_collapse_policy = 2,
-      tab_first_window = false,
-      tabs = {
-        height = 1,
-        from_top = true,
-        render_text = false,
-      },
-    },
-
-    hyprfocus = {
-      -- 'bounce' is the closest analogue of the old 'shrink' focus_animation.
-      mode = "bounce",
-      bounce_strength = 0.99,
-      only_on_monitor_change = false,
-      -- Animation curves are now declared via hl.animation() in animations.lua
-      -- under the `hyprfocusIn` / `hyprfocusOut` leaves.
+      -- autotile = {
+      --   enabled = true,
+      --   trigger_width = 855,
+      --   trigger_height = 500,
+      -- },
+      -- no_gaps_when_only = 1,
+      -- node_collapse_policy = 2,
+      -- tab_first_window = false,
+      -- tabs = {
+      --   height = 1,
+      --   from_top = true,
+      --   render_text = false,
+      -- },
     },
   },
 })

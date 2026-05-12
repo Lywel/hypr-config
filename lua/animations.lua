@@ -44,7 +44,3 @@ anim("workspaces", 1.94, "almostLinear", "fade")
 anim("workspacesIn", 1.21, "almostLinear", "fade")
 anim("workspacesOut", 1.94, "almostLinear", "fade")
 anim("zoomFactor", 7, "quick")
-
--- hyprfocus animation leaves (only consumed when the plugin is loaded).
-anim("hyprfocusIn", 1.7, "easeOutQuint")
-anim("hyprfocusOut", 1.7, "easeOutQuint")

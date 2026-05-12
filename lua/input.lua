@@ -27,6 +27,5 @@ hl.device({
 
 hl.device({
   name = "mx-anywhere-2-mouse",
-  sensitivity = 2,
   accel_profile = "adaptive",
 })
