@@ -3,68 +3,70 @@
 
 local util = require("lua.util")
 
--- ----------------------------------------------------------------------
--- Auto-float rules: title-pattern matched, applied with float + center + resize.
--- Add new entries to this table; the dispatcher below stays untouched.
--- ----------------------------------------------------------------------
+-- ---------------------------------------------------------------------------
+-- Auto-float rules
+--
+-- When a window's title changes and matches any of the Lua patterns in a
+-- rule, the window is floated, centered, and resized to the given
+-- percentage of the *active* monitor's dimensions.
+--
+-- We listen on `window.title` (not `window.open`) because some apps create a
+-- window with a generic title (e.g. "Chrome") and only set the real title a
+-- few ms later (e.g. "Bitwarden ..."). The title event fires for each change.
+--
+-- Note: `window.monitor` is nil during early title events (the window may
+-- not be mapped yet), so we use `hl.get_active_monitor()` instead — by
+-- definition the window being created lives on the focused monitor.
+--
+-- To add a rule, append an entry to `rules` below.
+-- ---------------------------------------------------------------------------
 
 ---@class FloatRule
----@field name      string    purely for documentation
----@field patterns  string[]  Lua patterns to match against window title
----@field width     string    e.g. "20%"  (passed to resizewindowpixel exact)
----@field height    string    e.g. "54%"
+---@field width    integer    width as percent of monitor width  (1..100)
+---@field height   integer    height as percent of monitor height (1..100)
+---@field patterns string[]   Lua patterns matched against window title
 
 ---@type FloatRule[]
-local float_rules = {
-  {
-    name = "bitwarden",
-    patterns = {
+local rules = {
+  { width = 30, height = 54, patterns = {
       "%(Bitwarden.*Password Manager%) %- Bitwarden",
       "^Bitwarden$",
-    },
-    width = "30%",
-    height = "54%",
-  },
-  {
-    name = "google-signin",
-    patterns = {
+  }},
+  { width = 25, height = 54, patterns = {
       "^Connexion : comptes Google %—",
       "^Sign In %- Google Accounts %— ",
       "^Sign in %- Google Accounts %- Helium$",
-    },
-    width = "25%",
-    height = "54%",
-  },
-  {
-    name = "metamask-firefox",
-    patterns = { "^Extension: %(MetaMask%) %- MetaMask %— Firefox" },
-    width = "25%",
-    height = "54%",
-  },
+  }},
+  { width = 25, height = 54, patterns = {
+      "^Extension: %(MetaMask%) %- MetaMask %— Firefox",
+  }},
 }
 
-local function match_any(s, patterns)
-  for _, p in ipairs(patterns) do
-    if s:match(p) then return true end
+---Return true if `title` matches any pattern in `rule`.
+---@param title string
+---@param rule  FloatRule
+---@return boolean
+local function matches(title, rule)
+  for _, pattern in ipairs(rule.patterns) do
+    if title:match(pattern) then return true end
   end
   return false
 end
 
-local function float_center_resize(addr, w, h)
-  -- The window-targeted variants of float/resize/center don't have a
-  -- documented Lua arg shape yet, so use exec_raw for the chained dispatch.
-  -- addr already arrives as a hex string (e.g. "0x55..."); pass through.
-  hl.dispatch(hl.dsp.exec_raw(
-    ("togglefloating address:%s ; resizewindowpixel exact %s %s,address:%s ; centerwindow")
-    :format(addr, w, h, addr)
-  ))
-end
+hl.on("window.title", function(window)
+  local title = window.title or ""
+  for _, rule in ipairs(rules) do
+    if matches(title, rule) then
+      local monitor = hl.get_active_monitor()
+      if not monitor then return end
 
-hl.on("window.title", function(w)
-  local title = w.title or ""
-  for _, rule in ipairs(float_rules) do
-    if match_any(title, rule.patterns) then
-      float_center_resize(w.address, rule.width, rule.height)
+      hl.dispatch(hl.dsp.window.float({  window = window, action = "on" }))
+      hl.dispatch(hl.dsp.window.center({ window = window, action = "on" }))
+      hl.dispatch(hl.dsp.window.resize({
+        window = window,
+        x = math.floor(monitor.width  * rule.width  / 100),
+        y = math.floor(monitor.height * rule.height / 100),
+      }))
       return
     end
   end
