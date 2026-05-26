@@ -179,8 +179,8 @@ map({
   { mod .. " + Z",           exec("pypr zoom ++0.17"),       nil, "pypr zoom in" },
   { mod_S .. " + Z",         exec("pypr zoom"),              nil, "pypr zoom reset" },
   { mod .. " + semicolon",   exec("pypr menu"),              nil, "pypr menu" },
-  { "ALT_R + B",             exec("pypr toggle beeper"),     nil, "pypr: beeper" },
-  { "ALT_R + M",             exec("pypr toggle betterbird"), nil, "pypr: betterbird" },
+  { "ALT + B",               exec("pypr toggle beeper"),     nil, "pypr: beeper" },
+  { "ALT + M",               exec("pypr toggle betterbird"), nil, "pypr: betterbird" },
 })
 
 -- ======================================================================
