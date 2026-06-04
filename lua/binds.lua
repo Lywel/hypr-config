@@ -10,7 +10,7 @@
 -- The fallback bindset (vanilla movefocus/movewindow/...) is intentionally
 -- preserved so flipping this flag rescues the system without further edits.
 
-local USE_HY3 = false   -- hy3 fails to build on 0.55; flip back when fixed
+local USE_HY3 = true -- hy3 fails to build on 0.55; flip back when fixed
 
 local util    = require("lua.util")
 local A       = require("lua.apps")

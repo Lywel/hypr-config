@@ -6,7 +6,6 @@ local uwsm_apps = {
   "secret-tool lookup type unlock-keyring",
   "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1",
   "batsignal -w 9 -c 6 -d 3",
-  "hyprpanel",
   "nm-applet --indicator",
   "pypr",
   "udiskie --no-automount --notify",
@@ -14,6 +13,7 @@ local uwsm_apps = {
   -- binary lands in $PATH.
   "~/Documents/usbwatch-rs/target/release/usbwatch run --rules ~/.config/hypr/scripts/usbwatch_scrcpy.yml",
   "hyprpm reload -n",
+  "solaar --window hide",
 }
 
 -- Commands launched once per session directly (no uwsm wrapper).
