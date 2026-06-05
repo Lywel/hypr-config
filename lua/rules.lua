@@ -83,6 +83,8 @@ local app_specs = {
   -- handled in lua/events.lua.
   { by = "title", name = "Bitwarden",   float = true, center = true,     size = "920 780" },
 
+  { by = "title", name = "hyprrandr",   float = true, center = true,     size = "722 622" },
+
   -- Ledger Live: float + fixed size.
   { by = "class", name = "Ledger Live", float = true, size = "1368 1026" },
 

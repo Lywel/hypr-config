@@ -3,7 +3,6 @@
 
 -- Commands launched once per session via uwsm-app (scoped to user systemd).
 local uwsm_apps = {
-  "secret-tool lookup type unlock-keyring",
   "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1",
   "batsignal -w 9 -c 6 -d 3",
   "nm-applet --indicator",

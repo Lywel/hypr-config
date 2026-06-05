@@ -64,6 +64,7 @@ map({
 -- ======================================================================
 
 map({
+  { mod .. " + M",        app("/home/maxime/worktrees/github.com/Lywel/hyprandr/build/hyprrandr"),           nil, "Hyprrandr" },
   { mod .. " + E",        app(A.file_manager),           nil, "File manager" },
   { mod .. " + SPACE",    exec(A.menu),                  nil, "App menu (tofi)" },
   { mod .. " + RETURN",   app(A.terminal),               nil, "Terminal" },

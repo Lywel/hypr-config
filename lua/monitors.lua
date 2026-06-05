@@ -22,6 +22,14 @@ hl.monitor({
 
 -- Laptop-on-desk-to-the-right layout (default for pya-max01).
 hl.monitor({
+  output   = "Dell Inc. DELL S3425DW 23MPR44",
+  mode     = "3440x1440@60",
+  position = "-3440x0",
+  scale    = "1",
+})
+
+-- Laptop-on-desk-to-the-right layout (default for pya-max01).
+hl.monitor({
   output   = "desc:Dell Inc. DELL S3425DW J6MPR44",
   mode     = "3440x1440@120",
   position = "-3440x-800",
