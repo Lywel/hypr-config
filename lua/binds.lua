@@ -50,13 +50,13 @@ local LOCKED_R = { locked = true, repeating = true }
 -- ======================================================================
 
 map({
-  { "switch:Lid Switch",  exec(A.lock),                                                                           LOCKED, "Lock on lid close" },
-  { mod_S .. " + L",      exec(A.lock),                                                                           LOCKED, "Lock session" },
-  { mod .. " + ESCAPE",   exec("uwsm stop"),                                                                      nil,    "Quit Hyprland (uwsm)" },
+  { "switch:Lid Switch", exec(A.lock),                                                                           LOCKED, "Lock on lid close" },
+  { mod_S .. " + L",     exec(A.lock),                                                                           LOCKED, "Lock session" },
+  { mod .. " + ESCAPE",  exec("uwsm stop"),                                                                      nil,    "Quit Hyprland (uwsm)" },
 
   -- Standing desk (linak).
-  { "SHIFT_R + UP",       exec("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to stand"), nil,    "Desk: stand" },
-  { "SHIFT_R + DOWN",     exec("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to sit"),   nil,    "Desk: sit" },
+  { "SHIFT_R + UP",      exec("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to stand"), nil,    "Desk: stand" },
+  { "SHIFT_R + DOWN",    exec("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to sit"),   nil,    "Desk: sit" },
 })
 
 -- ======================================================================
@@ -64,15 +64,19 @@ map({
 -- ======================================================================
 
 map({
-  { mod .. " + M",        app("/home/maxime/worktrees/github.com/Lywel/hyprandr/build/hyprrandr"),           nil, "Hyprrandr" },
-  { mod .. " + E",        app(A.file_manager),           nil, "File manager" },
-  { mod .. " + SPACE",    exec(A.menu),                  nil, "App menu (tofi)" },
-  { mod .. " + RETURN",   app(A.terminal),               nil, "Terminal" },
-  { mod_A .. " + RETURN", app(A.browser),                nil, "Browser" },
-  { mod_A .. " + 1",      app("gtk-launch helium-work"), nil, "Helium (work)" },
+  { mod .. " + M",        app("/home/maxime/worktrees/github.com/Lywel/hyprandr/build/hyprrandr"), nil, "Hyprrandr" },
+  { mod .. " + E",        app(A.file_manager),                                                     nil, "File manager" },
+  { mod .. " + SPACE",    exec(A.menu),                                                            nil, "App menu (tofi)" },
+  { mod .. " + RETURN",   app(A.terminal),                                                         nil, "Terminal" },
+  { mod_A .. " + RETURN", app(A.browser),                                                          nil, "Browser" },
+  { mod_A .. " + 1",      app("gtk-launch helium-work"),                                           nil, "Helium (work)" },
 
-  { mod .. " + Print",    app("hyprshot -m region -z"),  nil, "Screenshot" },
-  { mod .. " + F6",       app("hyprshot -m region -z"),  nil, "Screenshot" },
+  { mod .. " + Print", function()
+    hl.plugin.hyprcapture.open()
+  end, nil, "Screenshot" },
+  { mod .. " + F6", function()
+    hl.plugin.hyprcapture.open()
+  end, nil, "Screenshot" },
 
   -- Hyprland-aware window picker.
   { mod .. " + W", exec(
@@ -89,7 +93,7 @@ map({
 
   { mod .. " + P",                exec("tuned-adm profile laptop-battery-powersave"),                                     nil, "Tuned: powersave" },
   { mod_S .. " + P",              exec("tuned-adm profile balanced-battery"),                                             nil, "Tuned: balanced" },
-  { mod .. " + CTRL + SHIFT + P",     exec("tuned-adm profile throughput-performance"),                                       nil, "Tuned: performance" },
+  { mod .. " + CTRL + SHIFT + P", exec("tuned-adm profile throughput-performance"),                                       nil, "Tuned: performance" },
 
   { mod .. " + G",                function() util.toggle_gamemode() end,                                                  nil, "Toggle gamemode" },
   { mod_S .. " + Print",          exec("~/.config/hypr/scripts/screen-record.sh"),                                        nil, "Screen record" },
@@ -102,14 +106,14 @@ map({
 -- ======================================================================
 
 map({
-  { mod .. " + R",       hl.dsp.force_renderer_reload(),                    nil, "Reload renderer" },
-  { mod_S .. " + F",     hl.dsp.window.fullscreen({ mode = "fullscreen" }), nil, "Fullscreen" },
-  { mod .. " + F",       hl.dsp.window.center(),                            nil, "Center window" },
+  { mod .. " + R",     hl.dsp.force_renderer_reload(),                    nil, "Reload renderer" },
+  { mod_S .. " + F",   hl.dsp.window.fullscreen({ mode = "fullscreen" }), nil, "Fullscreen" },
+  { mod .. " + F",     hl.dsp.window.center(),                            nil, "Center window" },
 
   -- pypr layout-center.
-  { mod .. " + C",       exec("pypr layout_center toggle"),                 nil, "pypr center toggle" },
-  { mod .. " + left",    exec("pypr layout_center prev"),                   nil, "pypr center prev" },
-  { mod .. " + right",   exec("pypr layout_center next"),                   nil, "pypr center next" },
+  { mod .. " + C",     exec("pypr layout_center toggle"),                 nil, "pypr center toggle" },
+  { mod .. " + left",  exec("pypr layout_center prev"),                   nil, "pypr center prev" },
+  { mod .. " + right", exec("pypr layout_center next"),                   nil, "pypr center next" },
 })
 
 -- ======================================================================
@@ -176,11 +180,11 @@ map(movement)
 -- ======================================================================
 
 map({
-  { mod .. " + Z",           exec("pypr zoom ++0.17"),       nil, "pypr zoom in" },
-  { mod_S .. " + Z",         exec("pypr zoom"),              nil, "pypr zoom reset" },
-  { mod .. " + semicolon",   exec("pypr menu"),              nil, "pypr menu" },
-  { "ALT + B",               exec("pypr toggle beeper"),     nil, "pypr: beeper" },
-  { "ALT + M",               exec("pypr toggle betterbird"), nil, "pypr: betterbird" },
+  { mod .. " + Z",         exec("pypr zoom ++0.17"),       nil, "pypr zoom in" },
+  { mod_S .. " + Z",       exec("pypr zoom"),              nil, "pypr zoom reset" },
+  { mod .. " + semicolon", exec("pypr menu"),              nil, "pypr menu" },
+  { "ALT + B",             exec("pypr toggle beeper"),     nil, "pypr: beeper" },
+  { "ALT + M",             exec("pypr toggle betterbird"), nil, "pypr: betterbird" },
 })
 
 -- ======================================================================
@@ -188,22 +192,22 @@ map({
 -- ======================================================================
 
 local workspace_binds = {
-  { mod .. " + O",            hl.dsp.window.float({ action = "toggle" }), nil, "Toggle floating" },
-  { mod .. " + SLASH",        hl.dsp.layout(""),                          nil, "Layout msg" },
-  { mod .. " + 0",            focus_ws("10") },
+  { mod .. " + O",          hl.dsp.window.float({ action = "toggle" }), nil, "Toggle floating" },
+  { mod .. " + SLASH",      hl.dsp.layout(""),                          nil, "Layout msg" },
+  { mod .. " + 0",          focus_ws("10") },
 
-  { mod_C .. " + right",      focus_ws("e+1") },
-  { mod_C .. " + l",          focus_ws("e+1") },
-  { mod_C .. " + left",       focus_ws("e-1") },
-  { mod_C .. " + h",          focus_ws("e-1") },
+  { mod_C .. " + right",    focus_ws("e+1") },
+  { mod_C .. " + l",        focus_ws("e+1") },
+  { mod_C .. " + left",     focus_ws("e-1") },
+  { mod_C .. " + h",        focus_ws("e-1") },
 
   -- Special workspace.
-  { mod .. " + S",            hl.dsp.workspace.toggle_special("magic") },
-  { mod_S .. " + S",          exec("pypr toggle_special magic") },
+  { mod .. " + S",          hl.dsp.workspace.toggle_special("magic") },
+  { mod_S .. " + S",        exec("pypr toggle_special magic") },
 
   -- Scroll wheel.
-  { mod .. " + mouse_down",   focus_ws("e+1") },
-  { mod .. " + mouse_up",     focus_ws("e-1") },
+  { mod .. " + mouse_down", focus_ws("e+1") },
+  { mod .. " + mouse_up",   focus_ws("e-1") },
 }
 for i = 1, 9 do
   workspace_binds[#workspace_binds + 1] = { mod .. " + " .. i, focus_ws(tostring(i)) }
@@ -217,10 +221,10 @@ map(workspace_binds)
 -- BindOptions has no `mouse` field; drag/resize dispatchers self-signal
 -- mouse capture, so plain bind() works for both button and modifier triggers.
 map({
-  { mod .. " + mouse:272", hl.dsp.window.drag(),                      nil, "Drag window (LMB)" },
-  { mod .. " + Control_L", hl.dsp.window.drag(),                      nil, "Drag window (Ctrl)" },
-  { mod .. " + mouse:273", hl.dsp.window.resize(),                    nil, "Resize window (RMB)" },
-  { mod .. " + ALT_L",     hl.dsp.window.resize(),                    nil, "Resize window (Alt)" },
+  { mod .. " + mouse:272", hl.dsp.window.drag(),   nil, "Drag window (LMB)" },
+  { mod .. " + Control_L", hl.dsp.window.drag(),   nil, "Drag window (Ctrl)" },
+  { mod .. " + mouse:273", hl.dsp.window.resize(), nil, "Resize window (RMB)" },
+  { mod .. " + ALT_L",     hl.dsp.window.resize(), nil, "Resize window (Alt)" },
 })
 
 -- ======================================================================
