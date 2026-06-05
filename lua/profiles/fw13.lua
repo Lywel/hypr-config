@@ -1,9 +1,10 @@
 -- Framework 13 (fw13) profile overrides.
 
-local A   = require("lua.apps")
-local mod = A.mainMod
-
--- On this laptop the binary is "helium", not "helium-browser".
-A.browser = "helium"
-
-hl.bind(mod .. " + ALT + RETURN", hl.dsp.exec_raw(A.launch .. " " .. A.browser))
+hl.monitor({
+  output   = "eDP-1",
+  mode     = "preferred",
+  scale    = "1.33",
+  position = "0x0",
+  bitdepth = 10,
+  icc      = "/home/maxime/Downloads/BOE0CB4.icm",
+})

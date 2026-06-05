@@ -1,20 +1,7 @@
--- Per-host overrides for pya-max01.
---
--- This file loads AFTER all common modules. Override anything by simply
--- re-declaring it; Hyprland's later-wins semantics do the rest.
---
--- Examples
--- --------
---   -- Override a monitor:
---   hl.monitor({ output = "eDP-1", scale = 1.5, position = "0x0" })
---
---   -- Add a host-specific bind (or override an existing one):
---   hl.bind("SUPER + F12", hl.dsp.exec("uwsm-app -- work-vpn-toggle"))
---
---   -- Override a config value:
---   hl.config({ decoration = { rounding = 12 } })
---
---   -- Add an extra autostart command:
---   hl.exec_cmd("uwsm-app -- some-host-only-daemon")
---
--- pya-max01 currently has no overrides — the common base is the truth.
+hl.monitor({
+  output   = "eDP-1",
+  mode     = "preferred",
+  scale    = "1",
+  position = "0x0",
+  bitdepth = 10,
+})
