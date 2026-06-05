@@ -37,7 +37,6 @@ end
 
 local function exec(cmd) return hl.dsp.exec_raw(cmd) end
 local function app(cmd) return hl.dsp.exec_raw(A.launch .. " " .. cmd) end
-local function global(s) return hl.dsp.global(s) end
 local function focus_dir(d) return hl.dsp.focus({ direction = d }) end
 local function move_dir(d) return hl.dsp.window.move({ direction = d }) end
 local function move_ws(ws) return hl.dsp.window.move({ workspace = ws }) end
@@ -139,21 +138,21 @@ end
 local movement = {}
 
 if USE_HY3 then
-  -- hy3 grouping + kill. Plugin dispatchers go through hl.dsp.global until
-  -- outfoxxed publishes a Lua namespace via addLuaFunction.
+  -- hy3 grouping + kill. Plugin dispatchers via hl.plugin.hy3 Lua API.
+  local hy3 = hl.plugin.hy3
   movement = {
-    { mod .. " + v",   global("hy3:makegroup, v, force_ephemeral"), nil, "hy3: vsplit group" },
-    { mod .. " + b",   global("hy3:makegroup, h, force_ephemeral"), nil, "hy3: hsplit group" },
-    { mod .. " + t",   global("hy3:makegroup, tab, toggle"),        nil, "hy3: tab group" },
-    { mod .. " + Q",   global("hy3:killactive"),                    nil, "hy3: kill" },
-    { mod_S .. " + k", global("hy3:changefocus, raise"),            nil, "hy3: raise focus" },
+    { mod .. " + v",   hy3.make_group("v", { ephemeral = "force" }), nil, "hy3: vsplit group" },
+    { mod .. " + b",   hy3.make_group("h", { ephemeral = "force" }), nil, "hy3: hsplit group" },
+    { mod .. " + t",   hy3.make_group("tab", { toggle = true }),     nil, "hy3: tab group" },
+    { mod .. " + Q",   hy3.kill_active(),                            nil, "hy3: kill" },
+    { mod_S .. " + k", hy3.change_focus("raise"),                    nil, "hy3: raise focus" },
   }
   for_each_direction(function(key, _vanilla, h)
-    movement[#movement + 1] = { mod .. " + " .. key, global("hy3:movefocus, " .. h) }
-    movement[#movement + 1] = { mod_A .. " + " .. key, global("hy3:movewindow, " .. h) }
+    movement[#movement + 1] = { mod .. " + " .. key, hy3.move_focus(h) }
+    movement[#movement + 1] = { mod_A .. " + " .. key, hy3.move_window(h) }
   end)
   for i = 1, 9 do
-    movement[#movement + 1] = { mod_S .. " + " .. i, global(("hy3:movetoworkspace, %d, follow"):format(i)) }
+    movement[#movement + 1] = { mod_S .. " + " .. i, hy3.move_to_workspace(tostring(i), { follow = true }) }
   end
 else
   movement = {
