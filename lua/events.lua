@@ -28,18 +28,31 @@ local util = require("lua.util")
 
 ---@type FloatRule[]
 local rules = {
-  { width = 30, height = 54, patterns = {
+  {
+    width = 30,
+    height = 54,
+    patterns = {
       "%(Bitwarden.*Password Manager%) %- Bitwarden",
       "^Bitwarden$",
-  }},
-  { width = 25, height = 54, patterns = {
+    }
+  },
+  {
+    width = 25,
+    height = 54,
+    patterns = {
       "^Connexion : comptes Google %—",
       "^Sign In %- Google Accounts %— ",
       "^Sign in %- Google Accounts %- Helium$",
-  }},
-  { width = 25, height = 54, patterns = {
+      "^title: Meet - [a-z0-9]+-[a-z0-9]+-[a-z0-9]+$",
+    }
+  },
+  {
+    width = 25,
+    height = 54,
+    patterns = {
       "^Extension: %(MetaMask%) %- MetaMask %— Firefox",
-  }},
+    }
+  },
 }
 
 ---Return true if `title` matches any pattern in `rule`.
@@ -60,11 +73,11 @@ hl.on("window.title", function(window)
       local monitor = hl.get_active_monitor()
       if not monitor then return end
 
-      hl.dispatch(hl.dsp.window.float({  window = window, action = "on" }))
+      hl.dispatch(hl.dsp.window.float({ window = window, action = "on" }))
       hl.dispatch(hl.dsp.window.center({ window = window, action = "on" }))
       hl.dispatch(hl.dsp.window.resize({
         window = window,
-        x = math.floor(monitor.width  * rule.width  / 100),
+        x = math.floor(monitor.width * rule.width / 100),
         y = math.floor(monitor.height * rule.height / 100),
       }))
       return

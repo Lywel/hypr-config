@@ -26,5 +26,7 @@ hl.config({
       --   render_text = false,
       -- },
     },
+    dynamic_cursors = {
+    },
   },
 })

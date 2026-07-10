@@ -10,7 +10,7 @@
 -- The fallback bindset (vanilla movefocus/movewindow/...) is intentionally
 -- preserved so flipping this flag rescues the system without further edits.
 
-local USE_HY3 = true -- hy3 fails to build on 0.55; flip back when fixed
+local USE_HY3 = true
 
 local util    = require("lua.util")
 local A       = require("lua.apps")
@@ -53,10 +53,6 @@ map({
   { "switch:Lid Switch", exec(A.lock),                                                                           LOCKED, "Lock on lid close" },
   { mod_S .. " + L",     exec(A.lock),                                                                           LOCKED, "Lock session" },
   { mod .. " + ESCAPE",  exec("uwsm stop"),                                                                      nil,    "Quit Hyprland (uwsm)" },
-
-  -- Standing desk (linak).
-  { "SHIFT_R + UP",      exec("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to stand"), nil,    "Desk: stand" },
-  { "SHIFT_R + DOWN",    exec("cd ~/Documents/linak-desk && uv run linak-controller --forward --move-to sit"),   nil,    "Desk: sit" },
 })
 
 -- ======================================================================
