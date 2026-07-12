@@ -87,7 +87,8 @@ map({
   { mod .. " + EQUAL",            exec("hyprpanel --toggle-window=bar-0 && hyprpanel --toggle-window=bar-1"),             nil, "Toggle bars" },
   { mod_S .. " + EQUAL",          exec([[test -n "$(hyprpanel -l)" && hyprpanel -q || hyprctl dispatch exec hyprpanel]]), nil, "Restart hyprpanel" },
 
-  { mod .. " + P",                exec("tuned-adm profile laptop-battery-powersave"),                                     nil, "Tuned: powersave" },
+  -- { mod .. " + P",                exec("tuned-adm profile laptop-battery-powersave"),                                     nil, "Tuned: powersave" },
+  { mod .. " + P",                exec("tuned-adm profile extreme-lowpower"),                                             nil, "Tuned: powersave" },
   { mod_S .. " + P",              exec("tuned-adm profile balanced-battery"),                                             nil, "Tuned: balanced" },
   { mod .. " + CTRL + SHIFT + P", exec("tuned-adm profile throughput-performance"),                                       nil, "Tuned: performance" },
 
@@ -176,7 +177,7 @@ map(movement)
 -- ======================================================================
 
 map({
-  { mod .. " + Z",         exec("pypr zoom ++0.17"),       nil, "pypr zoom in" },
+  { mod .. " + Z",         exec("pypr zoom ++0.15"),       nil, "pypr zoom in" },
   { mod_S .. " + Z",       exec("pypr zoom"),              nil, "pypr zoom reset" },
   { mod .. " + semicolon", exec("pypr menu"),              nil, "pypr menu" },
   { "ALT + B",             exec("pypr toggle beeper"),     nil, "pypr: beeper" },

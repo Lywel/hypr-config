@@ -45,7 +45,8 @@ end
 local float_titles = {
   "Open File", "Zoom Workplace", "Bluetooth Devices", "Dolphin 2412",
   "EspNow Lights", "Picture-in-Picture", "blueman-manager",
-  "_crx_nngceckbapebfimnlniiiahkandclblb",
+  "_crx_nngceckbapebfimnlniiiahkandclblb", "Loading...", "Fritzing",
+  "KiCad Setup",
 }
 for _, t in ipairs(float_titles) do
   rule({ match = { title = "^(" .. t .. ")$" }, float = true })
