@@ -188,3 +188,13 @@ rule({ match = { class = "^(python3)$", title = "^(Tor Browser)$" }, float = tru
 -- Per-class size caps.
 rule({ match = { class = "^(contour)$" }, max_size = "2468 1425" })
 rule({ match = { class = "^(firefox-nightly)$" }, max_size = "2468 1425" })
+
+hl.window_rule({
+  name = "meet-pip-nodeco",
+  match = {
+    class = "helium",
+    title = "^Meet - [^ ]+$",
+  },
+  float = true,
+  border_size = 0,
+})
