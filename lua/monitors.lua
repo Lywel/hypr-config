@@ -1,6 +1,6 @@
--- Static monitor fallbacks. The `hmonitor` daemon manages dynamic
--- profiles in ~/.config/hypr/monitor-configs/ at runtime; these definitions
--- match conf.d/monitors.conf as a last-resort baseline.
+-- Monitor layout. Rules are matched most-specific-first: exact output name,
+-- then `desc:` substring, then the catch-all. `desc:` matching is a substring
+-- test, so keying on the model rather than the serial covers every unit.
 --
 -- Note: scale is a STRING in the Lua API (e.g. "1.33", "auto"), not a number.
 
@@ -12,56 +12,30 @@ hl.monitor({
 })
 
 hl.monitor({
-  output   = "desc:Samsung Electric Company S34J55x HTOM600498",
-  mode     = "3440x1440@74.98",
-  position = "-3440x0",
+  output   = "desc:Dell Inc. DELL S3425DW",
+  mode     = "3440x1440@120",
+  position = "-3440x-800",
   scale    = "1",
 })
 
--- Laptop-on-desk-to-the-right layout (default for pya-max01).
 hl.monitor({
-  output   = "Dell Inc. DELL S3425DW 23MPR44",
+  output   = "desc:Dell Inc. DELL S3423DWC",
+  mode     = "3440x1440@99.98",
+  position = "-3440x-800",
+  scale    = "1",
+})
+
+hl.monitor({
+  output   = "desc:Samsung Electric Company S34J55x",
   mode     = "3440x1440@60",
   position = "-3440x0",
   scale    = "1",
 })
 
--- Laptop-on-desk-to-the-right layout (default for pya-max01).
-hl.monitor({
-  output   = "desc:Dell Inc. DELL S3425DW J6MPR44",
-  mode     = "3440x1440@120",
-  position = "-3440x-800",
-  scale    = "1",
-})
-
--- Laptop-on-desk-to-the-right layout (default for pya-max01).
-hl.monitor({
-  output   = "desc:Dell Inc. DELL S3425DW 5KDRR44",
-  mode     = "3440x1440@120",
-  position = "-3440x-800",
-  scale    = "1",
-})
-
-
--- Laptop-on-desk-to-the-right layout (default for pya-max01).
-hl.monitor({
-  output   = "desc:Dell Inc. DELL S3425DW 3BDRR44",
-  mode     = "3440x1440@120",
-  position = "-3440x-800",
-  scale    = "1",
-})
--- Laptop-on-desk-to-the-right layout (default for pya-max01).
-hl.monitor({
-  output   = "desc:Dell Inc. DELL S3425DW 23MPR44",
-  mode     = "3440x1440@120",
-  position = "-3440x-800",
-  scale    = "1",
-})
-
--- Catch-all fallback for any other display.
+-- Anything else: let Hyprland pick the mode and scale, placed left of the laptop.
 hl.monitor({
   output   = "",
   mode     = "preferred",
-  position = "1925x0",
-  scale    = "1",
+  position = "auto-left",
+  scale    = "auto",
 })
