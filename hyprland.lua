@@ -49,3 +49,7 @@ if hostname and hostname ~= "" then
     })
   end
 end
+
+-- HyprEmoji config
+package.path = package.path .. ";" .. os.getenv("HOME") .. "/.config/hypremoji/?.lua"
+require("hypremoji")
