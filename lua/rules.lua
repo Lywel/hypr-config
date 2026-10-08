@@ -16,7 +16,7 @@ local float_classes = {
   "qv4l2", "Waydroid", "Cadence", "org.gnome.Evolution", "Catia",
   "Jack-keyboard", "Ledger Live", "mpv", "clipse",
   "com.saivert.pwvucontrol", "com.usebottles.bottles", "cpupower-gui",
-  "electron", "insta360 studio.exe", ".*\\.exe", "nm-connection-editor",
+  "electron", "insta360 studio.exe", ".*\\.exe", "nemo", "nm-connection-editor",
   "org.gabmus.whatip", "org.gnome.Nautilus", "org.gnome.seahorse.Application",
   "org.prismlauncher.PrismLauncher", "rdesktop", "xdg-desktop-portal-gtk",
   "Chromium", "io.missioncenter.MissionCenter", "Matplotlib", "QjackCtl",

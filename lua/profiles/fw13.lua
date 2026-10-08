@@ -6,6 +6,7 @@ hl.monitor({
   scale    = "1.33",
   position = "0x0",
   bitdepth = 10,
+  vrr      = 0,
   icc      = "/home/maxime/Downloads/BOE0CB4.icm",
 })
 
@@ -15,4 +16,3 @@ hl.monitor({
   position = "-3440x0",
   scale    = "1",
 })
-

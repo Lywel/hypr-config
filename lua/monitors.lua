@@ -12,6 +12,13 @@ hl.monitor({
 })
 
 hl.monitor({
+  output   = "desc:Seiko Epson Corporation EPSON PJ 0x01010101",
+  mode     = "1920x1080@60",
+  position = "0x-1080",
+  scale    = "1",
+})
+
+hl.monitor({
   output   = "desc:Samsung Electric Company S34J55x HTOM600498",
   mode     = "3440x1440@74.98",
   position = "-3440x0",
