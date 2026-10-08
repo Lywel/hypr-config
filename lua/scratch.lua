@@ -1,5 +1,6 @@
 -- Summonable apps. Each one lives on its own special workspace, floating and
 -- centered, and is reached from the "apps" submap (Super+U, then its key).
+-- Super+U hides the app instead when one is shown on the focused monitor.
 
 local A = require("lua.apps")
 
@@ -31,4 +32,17 @@ hl.define_submap("apps", "reset", function()
   hl.bind("catchall", hl.dsp.submap("reset"))
 end)
 
-hl.bind(A.mainMod .. " + U", hl.dsp.submap("apps"))
+local by_workspace = {}
+for _, app in ipairs(apps) do
+  by_workspace["special:" .. app.name] = app
+end
+
+hl.bind(A.mainMod .. " + U", function()
+  local shown = hl.get_active_special_workspace()
+  local app = shown and by_workspace[shown.name]
+  if app then
+    hl.dispatch(hl.dsp.workspace.toggle_special(app.name))
+  else
+    hl.dispatch(hl.dsp.submap("apps"))
+  end
+end)
