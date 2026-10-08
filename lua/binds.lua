@@ -189,9 +189,13 @@ map({
 -- ======================================================================
 
 local workspace_binds = {
-  { mod .. " + O",          hl.dsp.window.float({ action = "toggle" }), nil, "Toggle floating" },
+  { mod_S .. " + SPACE",    hl.dsp.window.float({ action = "toggle" }), nil, "Toggle floating" },
   { mod .. " + SLASH",      hl.dsp.layout(""),                          nil, "Layout msg" },
   { mod .. " + 0",          focus_ws("10") },
+
+  { mod .. " + O",          hl.dsp.focus({ monitor = "+1" }),                         nil, "Focus next monitor" },
+  { mod_S .. " + O",        hl.dsp.window.move({ monitor = "+1", follow = true }),    nil, "Window to next monitor" },
+  { mod_C .. " + O",        hl.dsp.workspace.move({ monitor = "+1" }),                nil, "Workspace to next monitor" },
 
   { mod_C .. " + right",    focus_ws("e+1") },
   { mod_C .. " + l",        focus_ws("e+1") },
