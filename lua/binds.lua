@@ -51,7 +51,7 @@ local LOCKED_R = { locked = true, repeating = true }
 
 map({
   { "switch:Lid Switch", exec(A.lock),                                                                           LOCKED, "Lock on lid close" },
-  { mod_S .. " + L",     exec(A.lock),                                                                           LOCKED, "Lock session" },
+  { mod_S .. " + ESCAPE", exec(A.lock),                                                                           LOCKED, "Lock session" },
   { mod .. " + ESCAPE",  exec("uwsm stop"),                                                                      nil,    "Quit Hyprland (uwsm)" },
 })
 
@@ -147,11 +147,11 @@ if USE_HY3 then
     { mod .. " + b",   hy3.make_group("h", { ephemeral = "force" }), nil, "hy3: hsplit group" },
     { mod .. " + t",   hy3.make_group("tab", { toggle = true }),     nil, "hy3: tab group" },
     { mod .. " + Q",   hy3.kill_active(),                            nil, "hy3: kill" },
-    { mod_S .. " + k", hy3.change_focus("raise"),                    nil, "hy3: raise focus" },
+    { mod .. " + A",   hy3.change_focus("raise"),                    nil, "hy3: raise focus" },
   }
   for_each_direction(function(key, _vanilla, h)
     movement[#movement + 1] = { mod .. " + " .. key, hy3.move_focus(h) }
-    movement[#movement + 1] = { mod_A .. " + " .. key, hy3.move_window(h) }
+    movement[#movement + 1] = { mod_S .. " + " .. key, hy3.move_window(h) }
   end)
   for i = 1, 9 do
     movement[#movement + 1] = { mod_S .. " + " .. i, hy3.move_to_workspace(tostring(i), { follow = true }) }
@@ -162,7 +162,7 @@ else
   }
   for_each_direction(function(key, v, _h)
     movement[#movement + 1] = { mod .. " + " .. key, focus_dir(v) }
-    movement[#movement + 1] = { mod_A .. " + " .. key, move_dir(v) }
+    movement[#movement + 1] = { mod_S .. " + " .. key, move_dir(v) }
   end)
   for i = 1, 9 do
     movement[#movement + 1] = { mod_S .. " + " .. i, move_ws(tostring(i)) }
