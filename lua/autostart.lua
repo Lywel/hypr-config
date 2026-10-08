@@ -18,7 +18,6 @@ local uwsm_apps = {
 -- Commands launched once per session directly (no uwsm wrapper).
 local once = {
   "uwsm finalize",
-  "hmonitor daemon", -- auto-manages displays + lid
 }
 
 hl.on("hyprland.start", function()
@@ -29,8 +28,3 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("uwsm-app -- " .. cmd)
   end
 end)
-
--- Runs on every config (re)load. hmonitor reads its profile DB and applies
--- the matching layout, so triggering a refresh after each reload keeps the
--- declared monitors.lua fallbacks consistent with hmonitor's view.
-hl.exec_cmd("hmonitor refresh")
