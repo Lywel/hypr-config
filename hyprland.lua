@@ -29,6 +29,7 @@ local modules = {
   "lua.monitors",
   "lua.rules",
   "lua.plugins",
+  "lua.scratch",
   "lua.binds",
   "lua.events",
   "lua.autostart",

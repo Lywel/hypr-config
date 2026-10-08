@@ -174,15 +174,13 @@ end
 map(movement)
 
 -- ======================================================================
--- pypr (scratchpad / zoom / menu)
+-- pypr (zoom / menu)
 -- ======================================================================
 
 map({
   { mod .. " + Z",         exec("pypr zoom ++0.15"),       nil, "pypr zoom in" },
   { mod_S .. " + Z",       exec("pypr zoom"),              nil, "pypr zoom reset" },
   { mod .. " + semicolon", exec("pypr menu"),              nil, "pypr menu" },
-  { "ALT + B",             exec("pypr toggle beeper"),     nil, "pypr: beeper" },
-  { "ALT + M",             exec("pypr toggle betterbird"), nil, "pypr: betterbird" },
 })
 
 -- ======================================================================
