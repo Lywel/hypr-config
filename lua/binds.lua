@@ -156,6 +156,7 @@ if USE_HY3 then
   for i = 1, 9 do
     movement[#movement + 1] = { mod_S .. " + " .. i, hy3.move_to_workspace(tostring(i), { follow = true }) }
   end
+  movement[#movement + 1] = { mod_S .. " + 0", hy3.move_to_workspace("10", { follow = true }) }
 else
   movement = {
     { mod .. " + Q", hl.dsp.window.close(), nil, "Close window" },
@@ -192,6 +193,7 @@ local workspace_binds = {
   { mod_S .. " + SPACE",    hl.dsp.window.float({ action = "toggle" }), nil, "Toggle floating" },
   { mod .. " + SLASH",      hl.dsp.layout(""),                          nil, "Layout msg" },
   { mod .. " + 0",          focus_ws("10") },
+  { mod .. " + TAB",        focus_ws("previous"),                       nil, "Previous workspace" },
 
   { mod .. " + O",          hl.dsp.focus({ monitor = "+1" }),                         nil, "Focus next monitor" },
   { mod_S .. " + O",        hl.dsp.window.move({ monitor = "+1", follow = true }),    nil, "Window to next monitor" },
