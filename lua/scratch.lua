@@ -5,8 +5,10 @@
 local A = require("lua.apps")
 
 local apps = {
-  { key = "b", name = "beeper",     class = "Beeper",                   cmd = "beeper",     size = "monitor_w*0.55 monitor_h*0.8" },
-  { key = "m", name = "betterbird", class = "eu.betterbird.Betterbird", cmd = "betterbird", size = "monitor_w*0.7 monitor_h*0.9" },
+  { key = "b", name = "beeper",     class = "Beeper",                   cmd = "beeper",     width = 55, height = 80 },
+  { key = "m", name = "betterbird", class = "eu.betterbird.Betterbird", cmd = "eu.betterbird.Betterbird", width = 70, height = 90 },
+  { key = "s", name = "slack", class = "com.slack.Slack", cmd = "com.slack.Slack", width = 70, height = 90 },
+  { key = "t", name = "teams", class = "com.github.IsmaelMartinez.teams_for_linux", cmd = "com.github.IsmaelMartinez.teams_for_linux", width = 70, height = 90 },
 }
 
 for _, app in ipairs(apps) do
@@ -14,7 +16,6 @@ for _, app in ipairs(apps) do
   hl.window_rule({ match = match, workspace = "special:" .. app.name })
   hl.window_rule({ match = match, float = true })
   hl.window_rule({ match = match, center = true })
-  hl.window_rule({ match = match, size = app.size })
 end
 
 local function summon(app)
@@ -33,9 +34,24 @@ hl.define_submap("apps", "reset", function()
 end)
 
 local by_workspace = {}
+local by_class = {}
 for _, app in ipairs(apps) do
   by_workspace["special:" .. app.name] = app
+  by_class[app.class] = app
 end
+
+-- Only the app's first window gets the scratch size, so its dialogs keep their own.
+hl.on("window.open", function(window)
+  local app = by_class[window.class]
+  local monitor = hl.get_active_monitor()
+  if not app or not monitor or #hl.get_windows({ class = app.class }) > 1 then return end
+  hl.dispatch(hl.dsp.window.resize({
+    window = window,
+    x = math.floor(monitor.width * app.width / 100),
+    y = math.floor(monitor.height * app.height / 100),
+  }))
+  hl.dispatch(hl.dsp.window.center({ window = window, action = "on" }))
+end)
 
 hl.bind(A.mainMod .. " + U", function()
   local shown = hl.get_active_special_workspace()
