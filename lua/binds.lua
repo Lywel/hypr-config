@@ -65,7 +65,6 @@ map({
   { mod .. " + SPACE",    exec(A.menu),                                                            nil, "App menu (tofi)" },
   { mod .. " + RETURN",   app(A.terminal),                                                         nil, "Terminal" },
   { mod_A .. " + RETURN", app(A.browser),                                                          nil, "Browser" },
-  { mod_A .. " + 1",      app("gtk-launch helium-work"),                                           nil, "Helium (work)" },
 
   { mod .. " + Print", function()
     hl.plugin.hyprcapture.open()
