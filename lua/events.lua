@@ -22,17 +22,16 @@ local util = require("lua.util")
 -- ---------------------------------------------------------------------------
 
 ---@class FloatRule
----@field width    integer    width as percent of monitor width  (1..100)
+---@field width?   integer    width as percent of monitor width  (1..100), nil keeps the window's width
 ---@field height   integer    height as percent of monitor height (1..100)
 ---@field patterns string[]   Lua patterns matched against window title
 
 ---@type FloatRule[]
 local rules = {
   {
-    width = 30,
-    height = 54,
+    -- Height only: after loading, Bitwarden resets the popout width to its Extension width setting.
+    height = 40,
     patterns = {
-      "%(Bitwarden.*Password Manager%) %- Bitwarden",
       "^Bitwarden$",
     }
   },
@@ -77,7 +76,7 @@ hl.on("window.title", function(window)
       hl.dispatch(hl.dsp.window.center({ window = window, action = "on" }))
       hl.dispatch(hl.dsp.window.resize({
         window = window,
-        x = math.floor(monitor.width * rule.width / 100),
+        x = rule.width and math.floor(monitor.width * rule.width / 100) or window.size.x,
         y = math.floor(monitor.height * rule.height / 100),
       }))
       return

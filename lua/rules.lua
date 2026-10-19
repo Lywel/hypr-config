@@ -80,9 +80,9 @@ end
 
 ---@type WindowSpec[]
 local app_specs = {
-  -- Bitwarden initial popup. The dynamic-resize for the post-load title is
-  -- handled in lua/events.lua.
-  { by = "title", name = "Bitwarden",   float = true, center = true,     size = "920 780" },
+  -- Bitwarden popout. No size: after loading, Bitwarden sets the window width itself
+  -- (Settings > Appearance > Extension width), and any other size squeezes its UI into a strip.
+  { by = "title", name = "Bitwarden",   float = true, center = true },
 
   { by = "title", name = "hyprrandr",   float = true, center = true,     size = "722 622" },
 
