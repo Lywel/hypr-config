@@ -5,7 +5,9 @@ hl.config({
   general = {
     gaps_in          = 3,
     gaps_out         = 1,
-    border_size      = 1,
+    -- Borders only show in gamemode and powersave (lua/util.lua). Otherwise the
+    -- glow marks the focused window.
+    border_size      = 0,
     col              = {
       active_border   = { colors = { "rgba(33ccffee)", "rgba(00ff99ee)" }, angle = 45 },
       inactive_border = "rgba(595959aa)",
@@ -41,6 +43,13 @@ hl.config({
       vibrancy = 1,
       vibrancy_darkness = 0.5,
     },
+    wobble = { enabled = true },
+    glow = {
+      enabled = true,
+      range = 20,
+      color = { colors = { "rgba(33ccff22)", "rgba(00ff9922)" }, angle = 45 },
+      color_inactive = "rgba(00000000)", -- unfocused windows get no glow
+    },
   },
 
   dwindle = {
@@ -48,7 +57,6 @@ hl.config({
     smart_split = false,
     force_split = 2,
     default_split_ratio = 1.3,
-    special_scale_factor = 0.96,
   },
 
   master = {

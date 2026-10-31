@@ -3,7 +3,7 @@
 --
 -- Curve syntax (from Hyprland's example/hyprland.lua):
 --   hl.curve("name", { type = "bezier", points = { {x0,y0}, {x1,y1} } })
---   hl.curve("name", { type = "spring", mass = M, stiffness = K, dampening = D })
+--   hl.curve("name", { type = "spring", mass = M, stiffness = K, damping = D })
 
 hl.config({ animations = { enabled = true } })
 

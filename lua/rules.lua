@@ -189,6 +189,9 @@ rule({ match = { class = "^(python3)$", title = "^(Tor Browser)$" }, float = tru
 rule({ match = { class = "^(contour)$" }, max_size = "2468 1425" })
 rule({ match = { class = "^(firefox-nightly)$" }, max_size = "2468 1425" })
 
+-- The global touchpad scroll_factor is tuned for the browser; Alacritty needs more.
+rule({ match = { class = "^(Alacritty)$" }, scroll_touchpad = 1 })
+
 hl.window_rule({
   name = "meet-pip-nodeco",
   match = {

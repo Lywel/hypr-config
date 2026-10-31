@@ -87,8 +87,14 @@ map({
   { mod_S .. " + EQUAL",          exec([[test -n "$(hyprpanel -l)" && hyprpanel -q || hyprctl dispatch exec hyprpanel]]), nil, "Restart hyprpanel" },
 
   -- { mod .. " + P",                exec("tuned-adm profile laptop-battery-powersave"),                                     nil, "Tuned: powersave" },
-  { mod .. " + P",                exec("tuned-adm profile extreme-lowpower"),                                             nil, "Tuned: powersave" },
-  { mod_S .. " + P",              exec("tuned-adm profile balanced-battery"),                                             nil, "Tuned: balanced" },
+  { mod .. " + P", function()
+    hl.exec_cmd("tuned-adm profile extreme-lowpower")
+    util.set_powersave(true)
+  end, nil, "Tuned: powersave" },
+  { mod_S .. " + P", function()
+    hl.exec_cmd("tuned-adm profile balanced-battery")
+    util.set_powersave(false)
+  end, nil, "Tuned: balanced" },
   { mod .. " + CTRL + SHIFT + P", exec("tuned-adm profile throughput-performance"),                                       nil, "Tuned: performance" },
 
   { mod .. " + G",                function() util.toggle_gamemode() end,                                                  nil, "Toggle gamemode" },

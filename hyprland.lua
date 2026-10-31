@@ -46,7 +46,7 @@ if hostname and hostname ~= "" then
   if not ok and not tostring(err):match("module .* not found") then
     hl.notification.create({
       text = ("Profile '%s' error: %s"):format(hostname, err),
-      time_ms = 5000,
+      timeout = 5000,
     })
   end
 end

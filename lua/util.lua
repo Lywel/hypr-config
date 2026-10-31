@@ -1,44 +1,74 @@
--- Shared helpers (gamemode toggle, bar visibility helper, etc.)
+-- Shared helpers: gamemode, powersave and hyprpanel bar visibility.
 
 local M = {}
 
--- Track gamemode state in-process so we don't need to query Hyprland.
+-- Both reset to false on every config reload, along with the rest of the Lua state.
 local gamemode_active = false
+local powersave_active = false
 
---- Toggle gamemode: disables animations, blur, gaps, rounding, and the panel.
---- Reload restores via Hyprland's normal config-reload path. Since we cannot
---- "reload" a Lua script the same way, on disable we re-apply the look config.
+local GAMEMODE_LOOK = {
+  animations = { enabled = false },
+  decoration = {
+    rounding = 0,
+    blur = { enabled = false },
+    shadow = { enabled = false },
+    glow = { enabled = false },
+    wobble = { enabled = false },
+  },
+  general = {
+    gaps_in = 0,
+    gaps_out = 0,
+    border_size = 1,
+  },
+}
+
+local POWERSAVE_LOOK = {
+  animations = { enabled = false },
+  decoration = {
+    blur = { enabled = false },
+    shadow = { enabled = false },
+    glow = { enabled = false },
+    wobble = { enabled = false },
+  },
+  general = { border_size = 1 },
+}
+
+---Runs a module again, bypassing the require() cache.
+---@param name string
+local function rerun(name)
+  package.loaded[name] = nil
+  require(name)
+end
+
+---Re-applies look.lua and animations.lua, then layers the active modes on top.
+local function apply_look()
+  rerun("lua.look")
+  rerun("lua.animations")
+  if powersave_active then hl.config(POWERSAVE_LOOK) end
+  if gamemode_active then hl.config(GAMEMODE_LOOK) end
+end
+
+---@param text string
+local function notify(text)
+  hl.notification.create({ text = text, timeout = 2000 })
+end
+
+---Toggles gamemode. Turning it on strips effects and gaps and opens cartridges.
 function M.toggle_gamemode()
-  if not gamemode_active then
-    -- Enable gamemode: kill panel, strip eye-candy.
-    hl.exec_cmd("hyprpanel -q")
-    hl.config({
-      animations = { enabled = false },
-      decoration = {
-        rounding = 0,
-        blur = { enabled = false },
-        shadow = { enabled = false },
-      },
-      general = {
-        gaps_in = 0,
-        gaps_out = 0,
-        border_size = 1,
-      },
-    })
-    hl.exec_cmd("cartridges")
-    gamemode_active = true
-    hl.notification.create({ text = "Gamemode ON", time_ms = 2000 })
-  else
-    -- Disable gamemode: restore values from look.lua / animations.lua.
-    -- Cheapest reliable path: re-run those modules.
-    package.loaded["lua.look"] = nil
-    package.loaded["lua.animations"] = nil
-    require("lua.look")
-    require("lua.animations")
-    hl.exec_cmd("uwsm-app -- hyprpanel")
-    gamemode_active = false
-    hl.notification.create({ text = "Gamemode OFF", time_ms = 2000 })
-  end
+  gamemode_active = not gamemode_active
+  apply_look()
+  if gamemode_active then hl.exec_cmd("cartridges") end
+  notify(gamemode_active and "Gamemode ON" or "Gamemode OFF")
+end
+
+---Turns powersave on or off. Powersave disables the GPU-heavy effects and
+---shows a 1 px border.
+---@param on boolean
+function M.set_powersave(on)
+  if on == powersave_active then return end
+  powersave_active = on
+  apply_look()
+  notify(on and "Powersave ON" or "Powersave OFF")
 end
 
 --- Toggle hyprpanel bar visibility only when current visibility doesn't match.
