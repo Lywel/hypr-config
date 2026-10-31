@@ -22,8 +22,8 @@ local function fit(app, window)
   if not monitor then return end
   hl.dispatch(hl.dsp.window.resize({
     window = window,
-    x = math.floor(monitor.width * app.width / 100),
-    y = math.floor(monitor.height * app.height / 100),
+    x = math.floor(monitor.width / monitor.scale * app.width / 100),
+    y = math.floor(monitor.height / monitor.scale * app.height / 100),
   }))
   hl.dispatch(hl.dsp.window.center({ window = window, action = "on" }))
 end
