@@ -20,7 +20,7 @@ local float_classes = {
   "org.gabmus.whatip", "org.gnome.Nautilus", "org.gnome.seahorse.Application",
   "org.prismlauncher.PrismLauncher", "rdesktop", "xdg-desktop-portal-gtk",
   "Chromium", "io.missioncenter.MissionCenter", "Matplotlib", "QjackCtl",
-  "com.github.wwmm.easyeffects", "YouTube Music", "imv",
+  "com.github.wwmm.easyeffects", "YouTube Music", "imv", "nsys-ui",
 }
 for _, cls in ipairs(float_classes) do
   rule({ match = { class = "^(" .. cls .. ")$" }, float = true })
@@ -195,8 +195,8 @@ rule({ match = { class = "^(Alacritty)$" }, scroll_touchpad = 1 })
 hl.window_rule({
   name = "meet-pip-nodeco",
   match = {
-    class = "helium",
-    title = "^Meet - [^ ]+$",
+    class = "helium.*",
+    title = "^Meet [-–] .+$",
   },
   float = true,
   border_size = 0,
